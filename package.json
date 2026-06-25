@@ -8,6 +8,7 @@
     "frontend": "vite",
     "server": "node server.js",
     "build": "tsc -b && vite build",
+    "vercel-build": "npm run build",
     "lint": "oxlint",
     "preview": "vite preview"
   },

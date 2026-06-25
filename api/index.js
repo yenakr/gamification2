@@ -1,5 +1,7 @@
 import express from 'express';
-import pg from 'pg';
+import pgpkg from 'pg';
+const { Pool } = pgpkg;
+
 import bcrypt from 'bcryptjs';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -19,10 +21,18 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_gamification_token_key_123!';
 
+// Sanitize connection string (strip quotes if users pasted with quotes in Vercel UI)
+let connectionString = process.env.DATABASE_URL || '';
+if (connectionString.startsWith('"') && connectionString.endsWith('"')) {
+  connectionString = connectionString.slice(1, -1);
+}
+if (connectionString.startsWith("'") && connectionString.endsWith("'")) {
+  connectionString = connectionString.slice(1, -1);
+}
+
 // Setup pg Pool
-const { Pool } = pg;
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: connectionString,
   ssl: {
     rejectUnauthorized: false
   }

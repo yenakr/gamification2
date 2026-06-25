@@ -75,9 +75,9 @@ async function initDb() {
 
     console.log('Database tables verified/created.');
 
+    const hashedPassword = await bcrypt.hash('hycarerobot7211!', 10);
     const adminCheck = await pool.query('SELECT * FROM gamification2_users WHERE username = $1', ['admin']);
     if (adminCheck.rows.length === 0) {
-      const hashedPassword = await bcrypt.hash('hycarerobot7211!', 10);
       const insertAdmin = await pool.query(
         'INSERT INTO gamification2_users (username, password, role) VALUES ($1, $2, $3) RETURNING id',
         ['admin', hashedPassword, 'admin']
@@ -89,6 +89,13 @@ async function initDb() {
         [adminId]
       );
       console.log('Default admin account created.');
+    } else {
+      // Force update existing admin password to match hycarerobot7211!
+      await pool.query(
+        'UPDATE gamification2_users SET password = $1 WHERE username = $2',
+        [hashedPassword, 'admin']
+      );
+      console.log('Admin password verified and updated.');
     }
   } catch (error) {
     console.error('Database initialization failed:', error);

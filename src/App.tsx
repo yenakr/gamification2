@@ -111,6 +111,16 @@ function App() {
     setScreen('dashboard');
   };
 
+  const handleGuestLogin = () => {
+    setToken('guest');
+    setUser({
+      id: 0,
+      username: '게스트',
+      role: 'guest'
+    });
+    setScreen('dashboard');
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -214,7 +224,7 @@ function App() {
 
   // If not logged in, show login screen
   if (!token || !user) {
-    return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+    return <LoginScreen onLoginSuccess={handleLoginSuccess} onGuestLogin={handleGuestLogin} />;
   }
 
   // If admin, show admin dashboard
@@ -232,7 +242,9 @@ function App() {
       <div className="admin-nav-bar" style={{ marginTop: '10px' }}>
         <div className="admin-nav-left">
           <span style={{ fontSize: '1.2rem' }}>🎓</span>
-          <span style={{ fontWeight: 700 }}>{user.username} 님 반갑습니다!</span>
+          <span style={{ fontWeight: 700 }}>
+            {user.role === 'guest' ? '게스트 님 반갑습니다! (학습 정보가 저장되지 않습니다)' : `${user.username} 님 반갑습니다!`}
+          </span>
         </div>
         <button className="secondary-btn" onClick={handleLogout} style={{ padding: '6px 16px', fontSize: '0.85rem' }}>
           로그아웃

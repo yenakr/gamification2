@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 
 interface LoginScreenProps {
   onLoginSuccess: (token: string, user: { id: number; username: string; role: string }) => void;
+  onGuestLogin: () => void;
 }
 
-export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
+export function LoginScreen({ onLoginSuccess, onGuestLogin }: LoginScreenProps) {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -121,6 +122,16 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             {isLoading ? '처리 중...' : isLoginMode ? '로그인' : '회원가입'}
           </button>
         </form>
+
+        <button
+          type="button"
+          className="secondary-btn"
+          style={{ width: '100%', marginBottom: '24px', borderRadius: '30px' }}
+          onClick={onGuestLogin}
+          disabled={isLoading}
+        >
+          로그인 없이 학습하기 (저장 안 됨)
+        </button>
 
         <div className="auth-toggle-text">
           {isLoginMode ? '처음이신가요?' : '이미 계정이 있으신가요?'}

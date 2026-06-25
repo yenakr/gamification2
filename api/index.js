@@ -46,6 +46,10 @@ const pool = new Pool({
 // Database initialization
 async function initDb() {
   try {
+    // Print current database info to verify correct connection
+    const dbInfo = await pool.query('SELECT current_database(), current_schema(), current_user');
+    console.log('Connected DB Info:', dbInfo.rows[0]);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS gamification2_users (
         id SERIAL PRIMARY KEY,

@@ -98,7 +98,19 @@ def parse_pre_quiz(text):
     text = text.replace('```', '').strip()
     parts = text.split('§')
     if len(parts) < 2:
-        return []
+        # Fallback if § separator is missing
+        if '[사전퀴즈]' in text:
+            subparts = text.split('[사전퀴즈]')
+            if len(subparts) >= 3:
+                q_part = subparts[1]
+                a_part = subparts[2]
+                parts = [q_part, a_part]
+            else:
+                return []
+        elif '정답 및 해설' in text:
+            parts = text.split('정답 및 해설')
+        else:
+            return []
     
     q_part, a_part = parts[0], parts[1]
     

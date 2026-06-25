@@ -116,8 +116,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {showXpModal && (
         <div className="level-up-overlay slide-up-anim" onClick={() => setShowXpModal(false)}>
           <div className="level-up-alert card-glow" onClick={(e) => e.stopPropagation()}>
-            <span className="lvl-alert-emoji">⭐ 돌보미 등급 안내 ⭐</span>
-            <h2>돌보미 등급 및 경험치 기준</h2>
+            <span className="lvl-alert-emoji">⭐</span>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 800 }}>돌보미 등급 및 경험치 기준</h2>
             
             <div style={{ margin: '20px 0', textAlign: 'left', lineHeight: '1.6', fontSize: '0.95rem' }}>
               <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px dotted rgba(0,0,0,0.12)' }}>

@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { RobotCategory, PartData } from './data/quizData';
 import { Dashboard } from './components/Dashboard';
 import { QuestHub } from './components/QuestHub';
 import { QuizPanel } from './components/QuizPanel';
 import { StudyPanel } from './components/StudyPanel';
+import { LoginScreen } from './components/LoginScreen';
+import { AdminDashboard } from './components/AdminDashboard';
 import { sfx } from './utils/soundEffects';
 
 type Screen = 'dashboard' | 'hub' | 'quiz' | 'study' | 'victory';
@@ -16,7 +18,20 @@ interface VictoryData {
   mode: 'pre' | 'post';
 }
 
+interface UserAuth {
+  id: number;
+  username: string;
+  role: string;
+}
+
 function App() {
+  // Auth state
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [user, setUser] = useState<UserAuth | null>(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
   const [screen, setScreen] = useState<Screen>('dashboard');
   const [level, setLevel] = useState(1);
   const [xp, setXp] = useState(0);
@@ -31,6 +46,83 @@ function App() {
   const [activeQuizMode, setActiveQuizMode] = useState<'pre' | 'post'>('pre');
   const [victoryData, setVictoryData] = useState<VictoryData | null>(null);
   const [showLevelUpAlert, setShowLevelUpAlert] = useState(false);
+
+  // Load progress when user changes/logs in
+  useEffect(() => {
+    if (token && user && user.role === 'user') {
+      loadProgressFromServer(token);
+    }
+  }, [token, user]);
+
+  const loadProgressFromServer = async (authToken: string) => {
+    try {
+      const response = await fetch('/api/progress/load', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setLevel(data.level || 1);
+        setXp(data.xp || 0);
+        setXpToNextLevel(data.xpToNextLevel || 100);
+        setBadges(data.badges || {});
+        setPreQuizCompleted(data.preQuizCompleted || {});
+      }
+    } catch (err) {
+      console.error('진행 상황을 불러오는 데 실패했습니다:', err);
+    }
+  };
+
+  const saveProgressToServer = async (
+    currentLvl: number,
+    currentXp: number,
+    currentXpMax: number,
+    currentBadges: Record<string, boolean>,
+    currentPreQuiz: Record<string, boolean>
+  ) => {
+    if (!token || !user || user.role !== 'user') return;
+
+    try {
+      await fetch('/api/progress/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          level: currentLvl,
+          xp: currentXp,
+          xpToNextLevel: currentXpMax,
+          badges: currentBadges,
+          preQuizCompleted: currentPreQuiz
+        })
+      });
+    } catch (err) {
+      console.error('진행 상황을 저장하는 데 실패했습니다:', err);
+    }
+  };
+
+  const handleLoginSuccess = (newToken: string, loggedUser: UserAuth) => {
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(loggedUser));
+    setToken(newToken);
+    setUser(loggedUser);
+    setScreen('dashboard');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setToken(null);
+    setUser(null);
+    setScreen('dashboard');
+    setLevel(1);
+    setXp(0);
+    setXpToNextLevel(100);
+    setBadges({});
+    setPreQuizCompleted({});
+  };
 
   const handleSelectCategory = (cat: RobotCategory) => {
     setSelectedCategory(cat);
@@ -47,7 +139,7 @@ function App() {
     }
   };
 
-  const addXp = (amount: number) => {
+  const addXp = (amount: number, updatedBadges?: Record<string, boolean>, updatedPreQuiz?: Record<string, boolean>) => {
     let nextXp = xp + amount;
     let nextLevel = level;
     let nextXpNeeded = xpToNextLevel;
@@ -67,6 +159,15 @@ function App() {
     setXp(nextXp);
     setLevel(nextLevel);
     setXpToNextLevel(nextXpNeeded);
+
+    // Save with latest values
+    saveProgressToServer(
+      nextLevel,
+      nextXp,
+      nextXpNeeded,
+      updatedBadges || badges,
+      updatedPreQuiz || preQuizCompleted
+    );
   };
 
   const handleQuizComplete = (score: number, maxCombo: number) => {
@@ -76,13 +177,18 @@ function App() {
     
     // Save completion state
     const partKey = `${selectedCategory.id}-${selectedPart.id}`;
+    let nextPreQuiz = { ...preQuizCompleted };
+    let nextBadges = { ...badges };
+
     if (activeQuizMode === 'pre') {
-      setPreQuizCompleted(prev => ({ ...prev, [partKey]: true }));
+      nextPreQuiz[partKey] = true;
+      setPreQuizCompleted(nextPreQuiz);
     } else {
-      setBadges(prev => ({ ...prev, [partKey]: true }));
+      nextBadges[partKey] = true;
+      setBadges(nextBadges);
     }
 
-    addXp(xpGained);
+    addXp(xpGained, nextBadges, nextPreQuiz);
     sfx.playVictory();
 
     setVictoryData({
@@ -106,8 +212,33 @@ function App() {
     setScreen('quiz');
   };
 
+  // If not logged in, show login screen
+  if (!token || !user) {
+    return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+  }
+
+  // If admin, show admin dashboard
+  if (user.role === 'admin') {
+    return (
+      <div className="app-shell" style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+        <AdminDashboard token={token} onLogout={handleLogout} />
+      </div>
+    );
+  }
+
   return (
     <div className="app-shell">
+      {/* User top status bar with signout */}
+      <div className="admin-nav-bar" style={{ marginTop: '10px' }}>
+        <div className="admin-nav-left">
+          <span style={{ fontSize: '1.2rem' }}>🎓</span>
+          <span style={{ fontWeight: 700 }}>{user.username} 님 반갑습니다!</span>
+        </div>
+        <button className="secondary-btn" onClick={handleLogout} style={{ padding: '6px 16px', fontSize: '0.85rem' }}>
+          로그아웃
+        </button>
+      </div>
+
       {showLevelUpAlert && (
         <div className="level-up-overlay slide-up-anim">
           <div className="level-up-alert card-glow">

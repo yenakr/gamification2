@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently \"npm run frontend\" \"npm run server\"",
     "frontend": "vite",
-    "server": "node server.js",
+    "server": "node api/index.js",
     "build": "tsc -b && vite build",
     "vercel-build": "npm run build",
     "lint": "oxlint",

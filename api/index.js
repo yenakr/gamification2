@@ -1,13 +1,10 @@
 import express from 'express';
 import pg from 'pg';
 import bcrypt from 'bcryptjs';
-import jwt from 'jwt-simple'; // wait, let's use jsonwebtoken instead since we installed it.
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-// jsonwebtoken module
 import jsonwebtoken from 'jsonwebtoken';
 
 dotenv.config();
@@ -34,7 +31,6 @@ const pool = new Pool({
 // Database initialization
 async function initDb() {
   try {
-    // 1. Create users table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS gamification2_users (
         id SERIAL PRIMARY KEY,
@@ -45,7 +41,6 @@ async function initDb() {
       )
     `);
 
-    // 2. Create progress table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS gamification2_user_progress (
         id SERIAL PRIMARY KEY,
@@ -59,9 +54,8 @@ async function initDb() {
       )
     `);
 
-    console.log('Database tables verified/created successfully.');
+    console.log('Database tables verified/created.');
 
-    // 3. Ensure admin user exists
     const adminCheck = await pool.query('SELECT * FROM gamification2_users WHERE username = $1', ['admin']);
     if (adminCheck.rows.length === 0) {
       const hashedPassword = await bcrypt.hash('hycarerobot7211!', 10);
@@ -71,18 +65,18 @@ async function initDb() {
       );
       const adminId = insertAdmin.rows[0].id;
 
-      // Create empty progress for admin
       await pool.query(
-        'INSERT INTO gamification2_user_progress (user_id, level, xp, xp_to_next_level) VALUES ($1, $2, $3, $4)',
-        [adminId, 1, 0, 100]
+        'INSERT INTO gamification2_user_progress (user_id, level, xp, xp_to_next_level) VALUES ($1, 1, 0, 100)',
+        [adminId]
       );
-      console.log('Default admin account created successfully.');
+      console.log('Default admin account created.');
     }
   } catch (error) {
-    console.error('Failed to initialize database:', error);
+    console.error('Database initialization failed:', error);
   }
 }
 
+// Run database setup
 initDb();
 
 // JWT Middleware
@@ -103,7 +97,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// API: Register
+// API Routes
 app.post('/api/auth/register', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -118,12 +112,11 @@ app.post('/api/auth/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      'INSERT INTO gamification2_users (username, password, role) VALUES ($1, $2, $3) RETURNING id, username, role',
+      'INSERT INTO gamification2_users (username, password, role) VALUES ($1, $2, $3) RETURNING id',
       [username, hashedPassword, 'user']
     );
     const userId = result.rows[0].id;
 
-    // Initialize progress row
     await pool.query(
       'INSERT INTO gamification2_user_progress (user_id, level, xp, xp_to_next_level, badges, pre_quiz_completed) VALUES ($1, 1, 0, 100, $2, $3)',
       [userId, '{}', '{}']
@@ -132,11 +125,10 @@ app.post('/api/auth/register', async (req, res) => {
     res.status(201).json({ message: '회원가입이 완료되었습니다.' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: '회원가입 중 서버 에러가 발생했습니다.' });
+    res.status(500).json({ error: '서버 에러가 발생했습니다.' });
   }
 });
 
-// API: Login
 app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -146,13 +138,13 @@ app.post('/api/auth/login', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM gamification2_users WHERE username = $1', [username]);
     if (result.rows.length === 0) {
-      return res.status(400).json({ error: '존재하지 않는 사용자이거나 비밀번호가 틀렸습니다.' });
+      return res.status(400).json({ error: '아이디 또는 비밀번호가 틀렸습니다.' });
     }
 
     const user = result.rows[0];
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res.status(400).json({ error: '존재하지 않는 사용자이거나 비밀번호가 틀렸습니다.' });
+      return res.status(400).json({ error: '아이디 또는 비밀번호가 틀렸습니다.' });
     }
 
     const token = jsonwebtoken.sign(
@@ -171,11 +163,10 @@ app.post('/api/auth/login', async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: '로그인 중 서버 에러가 발생했습니다.' });
+    res.status(500).json({ error: '서버 에러가 발생했습니다.' });
   }
 });
 
-// API: Save user progress
 app.post('/api/progress/save', authenticateToken, async (req, res) => {
   const { level, xp, xpToNextLevel, badges, preQuizCompleted } = req.body;
   const userId = req.user.id;
@@ -194,14 +185,13 @@ app.post('/api/progress/save', authenticateToken, async (req, res) => {
       [userId, level, xp, xpToNextLevel, JSON.stringify(badges), JSON.stringify(preQuizCompleted)]
     );
 
-    res.json({ message: '진행 상황이 저장되었습니다.' });
+    res.json({ message: '저장 완료' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: '저장 중 서버 에러가 발생했습니다.' });
+    res.status(500).json({ error: '서버 에러' });
   }
 });
 
-// API: Load user progress
 app.get('/api/progress/load', authenticateToken, async (req, res) => {
   const userId = req.user.id;
 
@@ -224,14 +214,13 @@ app.get('/api/progress/load', authenticateToken, async (req, res) => {
     res.json(result.rows[0]);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: '불러오기 중 서버 에러가 발생했습니다.' });
+    res.status(500).json({ error: '서버 에러' });
   }
 });
 
-// API: Admin route - Load all users progress
 app.get('/api/admin/users-progress', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
-    return res.status(403).json({ error: '권한이 없습니다. 관리자 전용 기능입니다.' });
+    return res.status(403).json({ error: '권한 없음' });
   }
 
   try {
@@ -255,19 +244,21 @@ app.get('/api/admin/users-progress', authenticateToken, async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: '사용자 통계 조회 중 서버 에러가 발생했습니다.' });
+    res.status(500).json({ error: '서버 에러' });
   }
 });
 
-// Serve frontend static files in production
-app.use(express.static(path.join(__dirname, 'dist')));
-
+// For local testing: serve dist static files
+app.use(express.static(path.join(__dirname, '../dist')));
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Start local server if run directly (not as a serverless function)
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running locally on port ${PORT}`);
+  });
+}
 
 export default app;

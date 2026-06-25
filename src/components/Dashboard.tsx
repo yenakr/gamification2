@@ -1,5 +1,5 @@
 import React from 'react';
-import { quizData, RobotCategory } from '../data/quizData';
+import { quizData, type RobotCategory } from '../data/quizData';
 import { sfx } from '../utils/soundEffects';
 
 interface DashboardProps {

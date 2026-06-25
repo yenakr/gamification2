@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PartData } from '../data/quizData';
+import type { PartData } from '../data/quizData';
 import { sfx } from '../utils/soundEffects';
 
 interface StudyPanelProps {

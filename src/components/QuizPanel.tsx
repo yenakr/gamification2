@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Question } from '../data/quizData';
+import type { Question } from '../data/quizData';
 import { sfx } from '../utils/soundEffects';
 
 interface QuizPanelProps {

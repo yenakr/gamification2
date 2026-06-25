@@ -1,5 +1,5 @@
 import React from 'react';
-import { RobotCategory, PartData } from '../data/quizData';
+import type { RobotCategory, PartData } from '../data/quizData';
 import { sfx } from '../utils/soundEffects';
 
 interface QuestHubProps {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { quizData, RobotCategory, PartData } from './data/quizData';
+import type { RobotCategory, PartData } from './data/quizData';
 import { Dashboard } from './components/Dashboard';
 import { QuestHub } from './components/QuestHub';
 import { QuizPanel } from './components/QuizPanel';

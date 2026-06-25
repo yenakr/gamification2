@@ -22,7 +22,12 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_gamification_token_key_123!';
 
 // Sanitize connection string (strip quotes if users pasted with quotes in Vercel UI)
-let connectionString = process.env.DATABASE_URL || '';
+let connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || '';
+
+if (!connectionString) {
+  throw new Error('DATABASE_URL or POSTGRES_URL is not set. Please configure database environment variables.');
+}
+
 if (connectionString.startsWith('"') && connectionString.endsWith('"')) {
   connectionString = connectionString.slice(1, -1);
 }

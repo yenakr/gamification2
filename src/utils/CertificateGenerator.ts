@@ -2,8 +2,8 @@ export class CertificateGenerator {
   static generateCanvas(
     userName: string,
     quizTitle: string,
-    score: number,
-    maxCombo: number,
+    _score: number,
+    _maxCombo: number,
     completedAt: string
   ): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
@@ -43,83 +43,50 @@ export class CertificateGenerator {
     // 3. Draw Content
     // Main Title: 수 료 증
     ctx.fillStyle = '#1f2937';
-    ctx.font = 'bold 36px "Noto Sans KR", sans-serif';
+    ctx.font = 'bold 38px "Noto Sans KR", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('이 수 증', canvas.width / 2, 90);
-
-    // Certificate Number (Mock)
-    const certNo = `제 CBQ-${Date.now().toString().slice(-6)} 호`;
-    ctx.fillStyle = '#6b7280';
-    ctx.font = '14px "Noto Sans KR", sans-serif';
-    ctx.fillText(certNo, canvas.width / 2, 130);
+    ctx.fillText('이 수 증', canvas.width / 2, 100);
 
     // User Name
     ctx.fillStyle = '#1f2937';
     ctx.font = 'bold 24px "Noto Sans KR", sans-serif';
-    ctx.fillText(`성 명 : ${userName || '게스트'}`, canvas.width / 2, 200);
+    ctx.fillText(`성 명 : ${userName || '게스트'}`, canvas.width / 2, 180);
 
     // Description text
     ctx.fillStyle = '#374151';
-    ctx.font = '16px "Noto Sans KR", sans-serif';
-    const descLine1 = '위 사람은 돌봄로봇 교육 플랫폼 [Care Bot Quiz]에서 제공하는';
-    const descLine2 = `[${quizTitle}] 교육 과정을`;
-    const descLine3 = '성공적으로 완료하고 우수한 성적으로 이수하였기에';
-    const descLine4 = '이 이수증을 수여합니다.';
+    ctx.font = '18px "Noto Sans KR", sans-serif';
+    ctx.fillText('위 사람은', canvas.width / 2, 240);
 
-    ctx.fillText(descLine1, canvas.width / 2, 260);
+    // Course Title (Highlighted in Purple and Bold)
     ctx.fillStyle = '#7c3aed';
-    ctx.font = 'bold 18px "Noto Sans KR", sans-serif';
-    ctx.fillText(descLine2, canvas.width / 2, 290);
-    ctx.fillStyle = '#374151';
-    ctx.font = '16px "Noto Sans KR", sans-serif';
-    ctx.fillText(descLine3, canvas.width / 2, 320);
-    ctx.fillText(descLine4, canvas.width / 2, 350);
+    ctx.font = 'bold 24px "Noto Sans KR", sans-serif';
+    ctx.fillText(`[${quizTitle}]`, canvas.width / 2, 290);
 
-    // 4. Details box
-    ctx.fillStyle = '#f3f4f6';
-    ctx.fillRect(150, 390, 500, 80);
+    // Remaining Description
+    ctx.fillStyle = '#374151';
+    ctx.font = '18px "Noto Sans KR", sans-serif';
+    ctx.fillText('교육 과정을 성공적으로 완료하고 이수하였기에', canvas.width / 2, 340);
+    ctx.fillText('이 이수증을 수여합니다.', canvas.width / 2, 375);
+
+    // 4. Details box (Only Completion Date)
+    ctx.fillStyle = '#f9fafb';
+    ctx.fillRect(200, 420, 400, 50);
     ctx.strokeStyle = '#e5e7eb';
     ctx.lineWidth = 1;
-    ctx.strokeRect(150, 390, 500, 80);
+    ctx.strokeRect(200, 420, 400, 50);
 
     ctx.fillStyle = '#4b5563';
-    ctx.font = '14px "Noto Sans KR", sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(`• 최종 점수 : ${score}점`, 200, 415);
-    ctx.fillText(`• 최대 콤보 : 🔥 ${maxCombo} Combo`, 200, 445);
-    ctx.fillText(`• 이수 일시 : ${completedAt}`, 420, 415);
-    ctx.fillText(`• 발급 기관 : Care Bot Quiz`, 420, 445);
-
-    // 5. Stamp Seal decoration
-    ctx.fillStyle = 'rgba(236, 72, 153, 0.15)';
-    ctx.beginPath();
-    ctx.arc(canvas.width - 120, canvas.height - 100, 45, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.strokeStyle = '#ec4899';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(canvas.width - 120, canvas.height - 100, 40, 0, Math.PI * 2);
-    ctx.stroke();
-
-    ctx.fillStyle = '#ec4899';
-    ctx.font = 'bold 14px "Noto Sans KR", sans-serif';
+    ctx.font = '15px "Noto Sans KR", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('돌봄로봇', canvas.width - 120, canvas.height - 110);
-    ctx.fillText('교육인증', canvas.width - 120, canvas.height - 90);
+    ctx.fillText(`이수 일시 : ${completedAt}`, canvas.width / 2, 445);
 
     // Date in footer
     const today = new Date();
     const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
-    ctx.fillStyle = '#4b5563';
-    ctx.font = '16px "Noto Sans KR", sans-serif';
-    ctx.fillText(dateStr, canvas.width / 2, 510);
-
-    // Footer signature
     ctx.fillStyle = '#1f2937';
-    ctx.font = 'bold 20px "Noto Sans KR", sans-serif';
-    ctx.fillText('돌봄 로봇 학습 센터 교육본부장', canvas.width / 2, 545);
+    ctx.font = 'bold 18px "Noto Sans KR", sans-serif';
+    ctx.fillText(dateStr, canvas.width / 2, 530);
 
     return canvas;
   }

@@ -217,9 +217,42 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
           <div className="book-page-content" style={{ flex: 1, padding: '40px 30px', overflowY: 'auto' }}>
             {pages[currentPageIndex] && (
               <div className="slide-up-anim" style={{ maxWidth: '800px', margin: '0 auto' }}>
-                <h3 className="book-section-title" style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--color-primary)', borderBottom: '2px solid var(--border-color)', paddingBottom: '12px', marginBottom: '24px', textAlign: 'left' }}>
-                  🔖 {pages[currentPageIndex].title}
-                </h3>
+                <div className="book-section-header" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--border-color)', paddingBottom: '12px', marginBottom: '24px', gap: '10px' }}>
+                  <h3 className="book-section-title" style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--color-primary)', textAlign: 'left', margin: 0 }}>
+                    🔖 {pages[currentPageIndex].title}
+                  </h3>
+                  
+                  {/* Quick Chapter Navigation Dropdown */}
+                  <div className="chapter-nav-dropdown" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <label htmlFor="chapter-select" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>이동:</label>
+                    <select
+                      id="chapter-select"
+                      value={currentPageIndex}
+                      onChange={(e) => {
+                        sfx.playClick();
+                        setCurrentPageIndex(Number(e.target.value));
+                      }}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border-color)',
+                        backgroundColor: 'var(--bg-secondary)',
+                        fontFamily: 'var(--font-game)',
+                        fontSize: '0.9rem',
+                        fontWeight: 600,
+                        color: 'var(--text-main)',
+                        cursor: 'pointer',
+                        maxWidth: '220px'
+                      }}
+                    >
+                      {pages.map((p, idx) => (
+                        <option key={idx} value={idx}>
+                          {idx + 1}. {p.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
                 
                 <div className="book-paragraphs" style={{ color: 'var(--text-main)' }}>
                   {pages[currentPageIndex].paragraphs.map((p, idx) => renderParagraph(p, idx))}

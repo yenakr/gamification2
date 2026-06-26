@@ -3,6 +3,7 @@ import { quizData } from '../data/quizData';
 
 interface ActivityLog {
   categoryName: string;
+  partId: number;
   partTitle: string;
   quizType: string;
   score: number;
@@ -255,9 +256,9 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
                               }}
                             >
                               <div>
-                                <strong style={{ color: 'var(--text-main)' }}>{activity.partTitle}</strong>
-                                <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                                  {activity.categoryName} • {activity.quizType === 'pre' ? '사전 퀴즈' : '평가 퀴즈'}
+                                <strong style={{ color: 'var(--text-main)', display: 'block' }}>{activity.categoryName}</strong>
+                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                  Part {activity.partId}. {activity.partTitle}, {activity.quizType === 'pre' ? '사전 퀴즈' : '평가 퀴즈'}
                                 </span>
                               </div>
                               <div style={{ textAlign: 'right' }}>

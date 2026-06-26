@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { quizData, type RobotCategory } from '../data/quizData';
 import { sfx } from '../utils/soundEffects';
+import { CertificateGenerator } from '../utils/CertificateGenerator';
 
 interface ActivityLog {
   categoryName: string;
+  partId: number;
   partTitle: string;
   quizType: string;
   score: number;
@@ -179,7 +181,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               setActiveTab('report');
             }}
           >
-            📈 나의 상세 진행 리포트
+            📈 나의 학습기록
           </button>
         </div>
       </div>
@@ -336,6 +338,66 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
               </div>
 
+              {/* Certificate Re-issue Card */}
+              <div className="card-glow" style={{ padding: '24px', textAlign: 'left' }}>
+                <h3 style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: '16px' }}>📜 이수증 재발급</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '200px', overflowY: 'auto', paddingRight: '4px' }}>
+                  {(() => {
+                    const completedParts: { category: RobotCategory; part: any }[] = [];
+                    quizData.forEach(cat => {
+                      cat.parts.forEach(part => {
+                        if (badges[`${cat.id}-${part.id}`]) {
+                          completedParts.push({ category: cat, part });
+                        }
+                      });
+                    });
+
+                    if (completedParts.length === 0) {
+                      return <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>아직 완료된 평가 과정이 없습니다.</span>;
+                    }
+
+                    return completedParts.map(({ category, part }) => (
+                      <div key={`${category.id}-${part.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+                        <div>
+                          <strong style={{ fontSize: '0.85rem', display: 'block', color: 'var(--text-main)' }}>{category.name}</strong>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Part {part.id}. {part.title}</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button 
+                            className="secondary-btn" 
+                            style={{ padding: '4px 8px', fontSize: '0.7rem', borderRadius: '8px' }}
+                            onClick={() => {
+                              CertificateGenerator.downloadImage(
+                                profile?.name || '학습자',
+                                `${category.name} - ${part.title}`,
+                                100,
+                                0
+                              );
+                            }}
+                          >
+                            📥 이미지
+                          </button>
+                          <button 
+                            className="secondary-btn" 
+                            style={{ padding: '4px 8px', fontSize: '0.7rem', borderRadius: '8px' }}
+                            onClick={() => {
+                              CertificateGenerator.printPdf(
+                                profile?.name || '학습자',
+                                `${category.name} - ${part.title}`,
+                                100,
+                                0
+                              );
+                            }}
+                          >
+                            🖨️ PDF
+                          </button>
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </div>
+
             </div>
 
             {/* Right Column: Recent Activity Logs */}
@@ -343,7 +405,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <h3 style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: '16px' }}>🕒 최근 학습 기록 (최신 10개)</h3>
               
               {activities && activities.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', maxHeight: '420px', paddingRight: '6px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', maxHeight: '450px', paddingRight: '6px' }}>
                   {activities.map((activity, idx) => (
                     <div 
                       key={idx} 
@@ -359,10 +421,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     >
                       <div>
                         <strong style={{ fontSize: '0.9rem', display: 'block', color: 'var(--text-main)' }}>
-                          {activity.partTitle}
+                          {activity.categoryName}
                         </strong>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {activity.categoryName} • {activity.quizType === 'pre' ? '사전 퀴즈' : '평가 퀴즈'}
+                          Part {activity.partId}. {activity.partTitle}, {activity.quizType === 'pre' ? '사전 퀴즈' : '평가 퀴즈'}
                         </span>
                       </div>
                       <div style={{ textAlign: 'right' }}>

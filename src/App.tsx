@@ -407,9 +407,11 @@ function App() {
         />
       )}
 
-      {screen === 'study' && selectedPart && (
+      {screen === 'study' && selectedPart && selectedCategory && (
         <StudyPanel
           part={selectedPart}
+          categoryId={selectedCategory.id}
+          categoryName={selectedCategory.name}
           onBack={() => setScreen('hub')}
           onStartPostQuiz={handleStartPostQuizFromStudy}
         />

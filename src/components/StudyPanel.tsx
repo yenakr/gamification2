@@ -45,10 +45,14 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       setError('');
       setCurrentPageIndex(0);
 
-      const fileName = categoryFileMapping[categoryId] || '01_transfer.md';
+      const fileName = categoryFileMapping[categoryId];
+      if (!fileName) {
+        throw new Error(`'${categoryName}' 카테고리의 학습용 MD 파일 매핑이 없습니다.`);
+      }
+      
       const response = await fetch(`/material/${fileName}`);
       if (!response.ok) {
-        throw new Error('학습용 MD 파일을 불러오지 못했습니다.');
+        throw new Error(`학습용 MD 파일(${fileName})을 불러오지 못했습니다.`);
       }
 
       const text = await response.text();

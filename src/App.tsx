@@ -448,34 +448,36 @@ function App() {
               : '평가 퀴즈를 성공적으로 완료하여 명예 훈장을 획득하셨습니다!'}
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', margin: '20px auto', maxWidth: '320px' }}>
-            <button 
-              className="secondary-btn" 
-              onClick={() => {
-                CertificateGenerator.downloadImage(
-                  profile?.name || user.username,
-                  `${selectedCategory.name} - ${selectedPart.title}`,
-                  victoryData.score,
-                  victoryData.maxCombo
-                );
-              }}
-            >
-              📥 이수증 이미지(PNG) 저장
-            </button>
-            <button 
-              className="secondary-btn" 
-              onClick={() => {
-                CertificateGenerator.printPdf(
-                  profile?.name || user.username,
-                  `${selectedCategory.name} - ${selectedPart.title}`,
-                  victoryData.score,
-                  victoryData.maxCombo
-                );
-              }}
-            >
-              🖨️ 이수증 PDF로 인쇄/저장
-            </button>
-          </div>
+          {victoryData.mode === 'post' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', margin: '20px auto', maxWidth: '320px' }}>
+              <button 
+                className="secondary-btn" 
+                onClick={() => {
+                  CertificateGenerator.downloadImage(
+                    profile?.name || user.username,
+                    `${selectedCategory.name} - ${selectedPart.title}`,
+                    victoryData.score,
+                    victoryData.maxCombo
+                  );
+                }}
+              >
+                📥 이수증 이미지(PNG) 저장
+              </button>
+              <button 
+                className="secondary-btn" 
+                onClick={() => {
+                  CertificateGenerator.printPdf(
+                    profile?.name || user.username,
+                    `${selectedCategory.name} - ${selectedPart.title}`,
+                    victoryData.score,
+                    victoryData.maxCombo
+                  );
+                }}
+              >
+                🖨️ 이수증 PDF로 인쇄/저장
+              </button>
+            </div>
+          )}
 
           <button className="primary-btn" onClick={handleCloseVictory} style={{ width: '100%', marginTop: '10px' }}>
             {victoryData.mode === 'pre' ? '학습 가이드 보기' : '목록으로'}

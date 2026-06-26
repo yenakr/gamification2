@@ -6,6 +6,8 @@ import { QuizPanel } from './components/QuizPanel';
 import { StudyPanel } from './components/StudyPanel';
 import { LoginScreen } from './components/LoginScreen';
 import { AdminDashboard } from './components/AdminDashboard';
+import { ProfileModal } from './components/ProfileModal';
+import { CertificateGenerator } from './utils/CertificateGenerator';
 import { sfx } from './utils/soundEffects';
 
 type Screen = 'dashboard' | 'hub' | 'quiz' | 'study' | 'victory';
@@ -40,6 +42,11 @@ function App() {
   const [preQuizCompleted, setPreQuizCompleted] = useState<Record<string, boolean>>({});
   const [isMuted, setIsMuted] = useState(false);
 
+  // Profile and Activity state
+  const [profile, setProfile] = useState<{ name: string; phone: string; careRobots: string[] } | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [activities, setActivities] = useState<any[]>([]);
+
   // Nav selections
   const [selectedCategory, setSelectedCategory] = useState<RobotCategory | null>(null);
   const [selectedPart, setSelectedPart] = useState<PartData | null>(null);
@@ -47,10 +54,12 @@ function App() {
   const [victoryData, setVictoryData] = useState<VictoryData | null>(null);
   const [showLevelUpAlert, setShowLevelUpAlert] = useState(false);
 
-  // Load progress when user changes/logs in
+  // Load progress and profile when user changes/logs in
   useEffect(() => {
     if (token && user && user.role === 'user') {
       loadProgressFromServer(token);
+      loadProfileFromServer(token);
+      loadActivitiesFromServer(token);
     }
   }, [token, user]);
 
@@ -71,6 +80,70 @@ function App() {
       }
     } catch (err) {
       console.error('진행 상황을 불러오는 데 실패했습니다:', err);
+    }
+  };
+
+  const loadProfileFromServer = async (authToken: string) => {
+    try {
+      const response = await fetch('/api/user/profile', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setProfile(data);
+        // Force registration if name or phone is empty
+        if (!data.name || !data.phone) {
+          setShowProfileModal(true);
+        }
+      }
+    } catch (err) {
+      console.error('프로필을 불러오는 데 실패했습니다:', err);
+    }
+  };
+
+  const loadActivitiesFromServer = async (authToken: string) => {
+    try {
+      const response = await fetch('/api/progress/activity', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setActivities(data);
+      }
+    } catch (err) {
+      console.error('활동 내역을 불러오는 데 실패했습니다:', err);
+    }
+  };
+
+  const handleSaveProfile = async (name: string, phone: string, careRobots: string[]) => {
+    if (!user) return;
+    if (user.role === 'guest') {
+      setProfile({ name, phone, careRobots });
+      setShowProfileModal(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name, phone, careRobots })
+      });
+      if (response.ok) {
+        setProfile({ name, phone, careRobots });
+        setShowProfileModal(false);
+      } else {
+        alert('프로필을 저장하는 데 실패했습니다.');
+      }
+    } catch (err) {
+      console.error('프로필 저장 중 에러:', err);
     }
   };
 
@@ -119,6 +192,8 @@ function App() {
       role: 'guest'
     });
     setScreen('dashboard');
+    // For guest, show profile creation on login
+    setShowProfileModal(true);
   };
 
   const handleLogout = () => {
@@ -132,6 +207,8 @@ function App() {
     setXpToNextLevel(100);
     setBadges({});
     setPreQuizCompleted({});
+    setProfile(null);
+    setActivities([]);
   };
 
   const handleSelectCategory = (cat: RobotCategory) => {
@@ -208,6 +285,36 @@ function App() {
       score,
       mode: activeQuizMode
     });
+
+    // Save activity log to server
+    if (user && user.role === 'user' && token) {
+      fetch('/api/progress/activity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          categoryId: selectedCategory.id,
+          categoryName: selectedCategory.name,
+          partId: selectedPart.id,
+          partTitle: selectedPart.title,
+          quizType: activeQuizMode,
+          score
+        })
+      }).then(() => loadActivitiesFromServer(token));
+    } else if (user && user.role === 'guest') {
+      // Add local guest log
+      const newAct = {
+        categoryName: selectedCategory.name,
+        partTitle: selectedPart.title,
+        quizType: activeQuizMode,
+        score,
+        completedAt: new Date().toISOString()
+      };
+      setActivities(prev => [newAct, ...prev].slice(0, 10));
+    }
+
     setScreen('victory');
   };
 
@@ -238,12 +345,26 @@ function App() {
 
   return (
     <div className="app-shell">
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <ProfileModal
+          initialName={profile?.name || ''}
+          initialPhone={profile?.phone || ''}
+          initialRobots={profile?.careRobots || []}
+          onSave={handleSaveProfile}
+          isMandatory={user.role !== 'guest' && (!profile?.name || !profile?.phone)}
+          onClose={() => setShowProfileModal(false)}
+        />
+      )}
+
       {/* User top status bar with signout */}
       <div className="admin-nav-bar" style={{ marginTop: '10px' }}>
         <div className="admin-nav-left">
           <span style={{ fontSize: '1.2rem' }}>🎓</span>
           <span style={{ fontWeight: 700 }}>
-            {user.role === 'guest' ? '게스트 님 반갑습니다! (학습 정보가 저장되지 않습니다)' : `${user.username} 님 반갑습니다!`}
+            {user.role === 'guest' 
+              ? `${profile?.name || '게스트'} 님 반갑습니다! (학습 정보가 저장되지 않습니다)` 
+              : `${profile?.name || user.username} 님 반갑습니다!`}
           </span>
         </div>
         <button className="secondary-btn" onClick={handleLogout} style={{ padding: '6px 16px', fontSize: '0.85rem' }}>
@@ -270,6 +391,9 @@ function App() {
           onSelectCategory={handleSelectCategory}
           isMuted={isMuted}
           onToggleMute={() => setIsMuted(!isMuted)}
+          profile={profile}
+          onEditProfile={() => setShowProfileModal(true)}
+          activities={activities}
         />
       )}
 
@@ -301,7 +425,7 @@ function App() {
         />
       )}
 
-      {screen === 'victory' && victoryData && (
+      {screen === 'victory' && victoryData && selectedCategory && selectedPart && (
         <div className="quiz-result-panel card-glow text-center slide-up-anim">
           <span className="victory-emoji">🏆</span>
           <h2 className="result-title text-green">퀴즈 완료</h2>
@@ -324,7 +448,36 @@ function App() {
               : '평가 퀴즈를 성공적으로 완료하여 명예 훈장을 획득하셨습니다!'}
           </p>
 
-          <button className="primary-btn" onClick={handleCloseVictory}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', margin: '20px auto', maxWidth: '320px' }}>
+            <button 
+              className="secondary-btn" 
+              onClick={() => {
+                CertificateGenerator.downloadImage(
+                  profile?.name || user.username,
+                  `${selectedCategory.name} - ${selectedPart.title}`,
+                  victoryData.score,
+                  victoryData.maxCombo
+                );
+              }}
+            >
+              📥 이수증 이미지(PNG) 저장
+            </button>
+            <button 
+              className="secondary-btn" 
+              onClick={() => {
+                CertificateGenerator.printPdf(
+                  profile?.name || user.username,
+                  `${selectedCategory.name} - ${selectedPart.title}`,
+                  victoryData.score,
+                  victoryData.maxCombo
+                );
+              }}
+            >
+              🖨️ 이수증 PDF로 인쇄/저장
+            </button>
+          </div>
+
+          <button className="primary-btn" onClick={handleCloseVictory} style={{ width: '100%', marginTop: '10px' }}>
             {victoryData.mode === 'pre' ? '학습 가이드 보기' : '목록으로'}
           </button>
         </div>

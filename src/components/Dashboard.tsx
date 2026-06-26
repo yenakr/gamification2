@@ -2,6 +2,20 @@ import React, { useState } from 'react';
 import { quizData, type RobotCategory } from '../data/quizData';
 import { sfx } from '../utils/soundEffects';
 
+interface ActivityLog {
+  categoryName: string;
+  partTitle: string;
+  quizType: string;
+  score: number;
+  completedAt: string;
+}
+
+interface UserProfile {
+  name: string;
+  phone: string;
+  careRobots: string[];
+}
+
 interface DashboardProps {
   level: number;
   xp: number;
@@ -10,6 +24,9 @@ interface DashboardProps {
   onSelectCategory: (category: RobotCategory) => void;
   isMuted: boolean;
   onToggleMute: () => void;
+  profile: UserProfile | null;
+  onEditProfile: () => void;
+  activities: ActivityLog[];
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -19,19 +36,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
   badges,
   onSelectCategory,
   isMuted,
-  onToggleMute
+  onToggleMute,
+  profile,
+  onEditProfile,
+  activities
 }) => {
   const [showXpModal, setShowXpModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'map' | 'report'>('map');
+
+  const getCategoryCompletionPercent = (catId: string) => {
+    const cat = quizData.find(c => c.id === catId);
+    if (!cat) return 0;
+    let count = 0;
+    cat.parts.forEach(part => {
+      if (badges[`${catId}-${part.id}`]) {
+        count++;
+      }
+    });
+    return Math.round((count / cat.parts.length) * 100);
+  };
 
   const getCategoryCompletionCount = (catId: string) => {
     let count = 0;
     const cat = quizData.find(c => c.id === catId);
     if (!cat) return 0;
-    for (let p = 1; p <= cat.parts.length; p++) {
-      if (badges[`${catId}-${p}`]) {
+    cat.parts.forEach(part => {
+      if (badges[`${catId}-${part.id}`]) {
         count++;
       }
-    }
+    });
     return count;
   };
 
@@ -46,6 +79,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const totalParts = quizData.reduce((acc, cat) => acc + cat.parts.length, 0);
   const totalBadges = Object.values(badges).filter(Boolean).length;
   const xpPercent = Math.min(100, Math.floor((xp / xpToNextLevel) * 100));
+  const overallCompletionPercent = Math.round((totalBadges / totalParts) * 100);
 
   const handleCategoryClick = (cat: RobotCategory) => {
     sfx.playClick();
@@ -62,7 +96,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <p className="logo-subtitle">돌봄로봇 교육 플랫폼</p>
           </div>
         </div>
-        <div className="header-actions">
+        <div className="header-actions" style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            className="secondary-btn"
+            style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+            onClick={() => {
+              sfx.playClick();
+              onEditProfile();
+            }}
+          >
+            👤 프로필 설정
+          </button>
           <button 
             className="mute-btn" 
             onClick={() => {
@@ -99,7 +143,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="stats-progress-section">
           <div className="stat-row">
             <span>EXP 경험치</span>
-            <span>{xp} / {xpToNextLevel}</span>
+            <span>{xp} / {xpToNextLevel} ({xpPercent}%)</span>
           </div>
           <div className="progress-bar-container">
             <div className="progress-bar-fill" style={{ width: `${xpPercent}%` }}></div>
@@ -107,10 +151,38 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         <div className="badge-count-section">
-          <span className="stat-label">획득 훈장</span>
-          <span className="stat-value">🏆 {totalBadges} / {totalParts}</span>
+          <span className="stat-label">전체 완료율</span>
+          <span className="stat-value" style={{ color: 'var(--color-neon-cyan)' }}>
+            📊 {overallCompletionPercent}% ({totalBadges} / {totalParts})
+          </span>
         </div>
       </section>
+
+      {/* Tab Nav Bar */}
+      <div className="admin-nav-bar" style={{ padding: '6px', margin: '20px 0', background: 'rgba(0,0,0,0.02)' }}>
+        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+          <button
+            className={activeTab === 'map' ? 'primary-btn' : 'secondary-btn'}
+            style={{ flex: 1, padding: '10px', borderRadius: '12px', fontSize: '0.95rem' }}
+            onClick={() => {
+              sfx.playClick();
+              setActiveTab('map');
+            }}
+          >
+            🗺️ 돌봄로봇 퀴즈 지도
+          </button>
+          <button
+            className={activeTab === 'report' ? 'primary-btn' : 'secondary-btn'}
+            style={{ flex: 1, padding: '10px', borderRadius: '12px', fontSize: '0.95rem' }}
+            onClick={() => {
+              sfx.playClick();
+              setActiveTab('report');
+            }}
+          >
+            📈 나의 상세 진행 리포트
+          </button>
+        </div>
+      </div>
 
       {/* Level-Up Info Modal */}
       {showXpModal && (
@@ -140,41 +212,180 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       )}
 
-      {/* Robot Categories Grid */}
-      <main className="quest-map-area">
-        <h2 className="section-title">돌봄로봇 목록</h2>
-        <div className="categories-grid">
-          {quizData.map((category) => {
-            const completedCount = getCategoryCompletionCount(category.id);
-            const isCompleted = completedCount === category.parts.length;
+      {/* Tab: Map (Default Categories Grid) */}
+      {activeTab === 'map' && (
+        <main className="quest-map-area slide-up-anim">
+          <h2 className="section-title">돌봄로봇 목록</h2>
+          <div className="categories-grid">
+            {quizData.map((category) => {
+              const completedCount = getCategoryCompletionCount(category.id);
+              const isCompleted = completedCount === category.parts.length;
 
-            return (
-              <div 
-                key={category.id} 
-                className={`category-card ${isCompleted ? 'category-finished' : ''}`}
-                onClick={() => handleCategoryClick(category)}
-              >
-                <div className="card-top">
-                  <span className="cat-icon">{category.icon}</span>
-                  <span className="cat-badge">{completedCount}/{category.parts.length} 완료</span>
-                </div>
-                <h3 className="cat-name">{category.name}</h3>
-                <div className="card-footer" style={{ borderTop: 'none', marginTop: '0', paddingTop: '0' }}>
-                  <div className="mini-progress-track">
-                    {category.parts.map((part) => (
-                      <span 
-                        key={part.id} 
-                        className={`mini-dot ${badges[`${category.id}-${part.id}`] ? 'active' : ''}`}
-                      />
-                    ))}
+              return (
+                <div 
+                  key={category.id} 
+                  className={`category-card ${isCompleted ? 'category-finished' : ''}`}
+                  onClick={() => handleCategoryClick(category)}
+                >
+                  <div className="card-top">
+                    <span className="cat-icon">{category.icon}</span>
+                    <span className="cat-badge">{completedCount}/{category.parts.length} 완료</span>
                   </div>
-                  <button className="enter-btn">퀴즈 풀기 →</button>
+                  <h3 className="cat-name">{category.name}</h3>
+                  <div className="card-footer" style={{ borderTop: 'none', marginTop: '0', paddingTop: '0' }}>
+                    <div className="mini-progress-track">
+                      {category.parts.map((part) => (
+                        <span 
+                          key={part.id} 
+                          className={`mini-dot ${badges[`${category.id}-${part.id}`] ? 'active' : ''}`}
+                        />
+                      ))}
+                    </div>
+                    <button className="enter-btn">퀴즈 풀기 →</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </main>
+      )}
+
+      {/* Tab: Report (Detailed Profile, Category Progress %, and Activities) */}
+      {activeTab === 'report' && (
+        <main className="quest-map-area slide-up-anim">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
+            
+            {/* Left Column: Profile Card & Category Progress */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* Profile Details Card */}
+              <div className="card-glow" style={{ padding: '24px', textAlign: 'left' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <h3 style={{ fontWeight: 800, fontSize: '1.15rem' }}>👤 나의 프로필 정보</h3>
+                  <button 
+                    className="secondary-btn" 
+                    onClick={onEditProfile}
+                    style={{ padding: '4px 12px', fontSize: '0.75rem', borderRadius: '15px' }}
+                  >
+                    수정
+                  </button>
+                </div>
+                
+                {profile ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.9rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>이름(실명)</span>
+                      <strong style={{ color: 'var(--text-main)' }}>{profile.name}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>전화번호</span>
+                      <strong style={{ color: 'var(--text-main)' }}>{profile.phone}</strong>
+                    </div>
+                    <div>
+                      <span style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>주요 돌봄로봇</span>
+                      {profile.careRobots && profile.careRobots.length > 0 ? (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                          {profile.careRobots.map(robotId => {
+                            const robot = quizData.find(r => r.id === robotId);
+                            return (
+                              <span key={robotId} className="badge-pill">
+                                {robot ? `${robot.icon} ${robot.name}` : robotId}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <span style={{ fontStyle: 'italic', fontSize: '0.8rem', color: 'var(--text-muted)' }}>등록된 로봇 없음</span>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    프로필 정보가 등록되지 않았습니다.<br />
+                    [수정] 버튼을 눌러 등록해주세요.
+                  </div>
+                )}
+              </div>
+
+              {/* Progress Bar per Care Robot */}
+              <div className="card-glow" style={{ padding: '24px', textAlign: 'left' }}>
+                <h3 style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: '16px' }}>📊 로봇별 진척도 (%)</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {quizData.map(category => {
+                    const percent = getCategoryCompletionPercent(category.id);
+                    return (
+                      <div key={category.id}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '4px' }}>
+                          <span style={{ fontWeight: 600 }}>{category.icon} {category.name}</span>
+                          <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{percent}% ({getCategoryCompletionCount(category.id)}/{category.parts.length})</span>
+                        </div>
+                        <div className="progress-bar-container" style={{ height: '8px' }}>
+                          <div 
+                            className="progress-bar-fill" 
+                            style={{ 
+                              width: `${percent}%`, 
+                              background: percent === 100 
+                                ? 'linear-gradient(to right, var(--color-neon-cyan), var(--color-neon-green))' 
+                                : 'var(--color-primary)'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </main>
+
+            </div>
+
+            {/* Right Column: Recent Activity Logs */}
+            <div className="card-glow" style={{ padding: '24px', textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
+              <h3 style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: '16px' }}>🕒 최근 학습 기록 (최신 10개)</h3>
+              
+              {activities && activities.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', maxHeight: '420px', paddingRight: '6px' }}>
+                  {activities.map((activity, idx) => (
+                    <div 
+                      key={idx} 
+                      style={{ 
+                        borderLeft: '3px solid var(--color-neon-pink)', 
+                        paddingLeft: '12px',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center' 
+                      }}
+                    >
+                      <div>
+                        <strong style={{ fontSize: '0.9rem', display: 'block', color: 'var(--text-main)' }}>
+                          {activity.partTitle}
+                        </strong>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {activity.categoryName} • {activity.quizType === 'pre' ? '사전 퀴즈' : '평가 퀴즈'}
+                        </span>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, color: 'var(--color-neon-green)' }}>
+                          {activity.score}점
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          {new Date(activity.completedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)', fontSize: '0.9rem', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  아직 완료한 퀴즈 기록이 없습니다.<br />퀴즈를 풀고 이력을 쌓아보세요!
+                </div>
+              )}
+            </div>
+
+          </div>
+        </main>
+      )}
     </div>
   );
 };

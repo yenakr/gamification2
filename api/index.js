@@ -60,6 +60,13 @@ async function initDb() {
       )
     `);
 
+    // Add profile columns to gamification2_users table
+    await pool.query(`
+      ALTER TABLE gamification2_users ADD COLUMN IF NOT EXISTS name VARCHAR(100);
+      ALTER TABLE gamification2_users ADD COLUMN IF NOT EXISTS phone VARCHAR(20);
+      ALTER TABLE gamification2_users ADD COLUMN IF NOT EXISTS care_robots JSONB DEFAULT '[]';
+    `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS gamification2_user_progress (
         id SERIAL PRIMARY KEY,
@@ -70,6 +77,21 @@ async function initDb() {
         badges JSONB DEFAULT '{}',
         pre_quiz_completed JSONB DEFAULT '{}',
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create activity log table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS gamification2_activity_log (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES gamification2_users(id) ON DELETE CASCADE,
+        category_id VARCHAR(50) NOT NULL,
+        category_name VARCHAR(100) NOT NULL,
+        part_id INTEGER NOT NULL,
+        part_title VARCHAR(100) NOT NULL,
+        quiz_type VARCHAR(20) NOT NULL,
+        score INTEGER NOT NULL,
+        completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
@@ -244,17 +266,86 @@ app.get('/api/progress/load', authenticateToken, async (req, res) => {
   }
 });
 
+// API: Load User Profile
+app.get('/api/user/profile', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const result = await pool.query(
+      'SELECT name, phone, care_robots as "careRobots" FROM gamification2_users WHERE id = $1',
+      [userId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: '서버 에러' });
+  }
+});
+
+// API: Update User Profile
+app.post('/api/user/profile', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const { name, phone, careRobots } = req.body;
+  try {
+    await pool.query(
+      'UPDATE gamification2_users SET name = $1, phone = $2, care_robots = $3 WHERE id = $4',
+      [name, phone, JSON.stringify(careRobots || []), userId]
+    );
+    res.json({ message: '프로필 저장 완료' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: '서버 에러' });
+  }
+});
+
+// API: Save Activity Log
+app.post('/api/progress/activity', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const { categoryId, categoryName, partId, partTitle, quizType, score } = req.body;
+  try {
+    await pool.query(
+      `INSERT INTO gamification2_activity_log (user_id, category_id, category_name, part_id, part_title, quiz_type, score)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [userId, categoryId, categoryName, partId, partTitle, quizType, score]
+    );
+    res.status(201).json({ message: '학습 기록 저장 완료' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: '서버 에러' });
+  }
+});
+
+// API: Get Activity Logs
+app.get('/api/progress/activity', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const result = await pool.query(
+      'SELECT category_id as "categoryId", category_name as "categoryName", part_id as "partId", part_title as "partTitle", quiz_type as "quizType", score, completed_at as "completedAt" FROM gamification2_activity_log WHERE user_id = $1 ORDER BY completed_at DESC LIMIT 10',
+      [userId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: '서버 에러' });
+  }
+});
+
 app.get('/api/admin/users-progress', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: '권한 없음' });
   }
 
   try {
-    const result = await pool.query(`
+    const usersResult = await pool.query(`
       SELECT 
         u.id, 
         u.username, 
         u.role, 
+        u.name,
+        u.phone,
+        u.care_robots as "careRobots",
         p.level, 
         p.xp, 
         p.xp_to_next_level as "xpToNextLevel", 
@@ -267,7 +358,37 @@ app.get('/api/admin/users-progress', authenticateToken, async (req, res) => {
       ORDER BY p.updated_at DESC NULLS LAST, u.username ASC
     `);
 
-    res.json(result.rows);
+    const logsResult = await pool.query(`
+      SELECT 
+        id,
+        user_id as "userId",
+        category_id as "categoryId",
+        category_name as "categoryName",
+        part_id as "partId",
+        part_title as "partTitle",
+        quiz_type as "quizType",
+        score,
+        completed_at as "completedAt"
+      FROM gamification2_activity_log
+      ORDER BY completed_at DESC
+    `);
+
+    // Group logs by userId
+    const logsByUser = {};
+    logsResult.rows.forEach(log => {
+      if (!logsByUser[log.userId]) {
+        logsByUser[log.userId] = [];
+      }
+      logsByUser[log.userId].push(log);
+    });
+
+    // Combine data
+    const combined = usersResult.rows.map(user => ({
+      ...user,
+      activities: logsByUser[user.id] || []
+    }));
+
+    res.json(combined);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: '서버 에러' });

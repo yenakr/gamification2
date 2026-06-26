@@ -1,15 +1,28 @@
 import { useState, useEffect } from 'react';
+import { quizData } from '../data/quizData';
+
+interface ActivityLog {
+  categoryName: string;
+  partTitle: string;
+  quizType: string;
+  score: number;
+  completedAt: string;
+}
 
 interface UserProgressData {
   id: number;
   username: string;
   role: string;
+  name: string | null;
+  phone: string | null;
+  careRobots: string[] | null;
   level: number | null;
   xp: number | null;
   xpToNextLevel: number | null;
   badges: Record<string, boolean> | null;
   preQuizCompleted: Record<string, boolean> | null;
   updated_at: string | null;
+  activities: ActivityLog[];
 }
 
 interface AdminDashboardProps {
@@ -21,6 +34,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
   const [users, setUsers] = useState<UserProgressData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [expandedUserId, setExpandedUserId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchUsersProgress();
@@ -50,6 +64,27 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
     }
   };
 
+  const getCategoryCompletionPercent = (userBadges: Record<string, boolean> | null, catId: string) => {
+    const badges = userBadges || {};
+    const cat = quizData.find(c => c.id === catId);
+    if (!cat) return 0;
+    let count = 0;
+    cat.parts.forEach(part => {
+      if (badges[`${catId}-${part.id}`]) {
+        count++;
+      }
+    });
+    return Math.round((count / cat.parts.length) * 100);
+  };
+
+  const toggleExpandUser = (userId: number) => {
+    if (expandedUserId === userId) {
+      setExpandedUserId(null);
+    } else {
+      setExpandedUserId(userId);
+    }
+  };
+
   // Helper stats
   const totalUsers = users.length;
   const avgLevel = totalUsers > 0
@@ -59,12 +94,6 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
     const badgeCount = user.badges ? Object.keys(user.badges).length : 0;
     return acc + badgeCount;
   }, 0);
-
-  const formatPartName = (key: string) => {
-    // Key format: 'category-part' (e.g. 'hygiene-wash')
-    // Just replace hyphens or make uppercase for display
-    return key.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  };
 
   return (
     <div style={{ padding: '20px 0' }} className="slide-up-anim">
@@ -112,74 +141,142 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
           가입된 일반 사용자가 아직 없습니다.
         </div>
       ) : (
-        <div className="user-grid">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {users.map((user) => {
             const userLvl = user.level || 1;
             const userXp = user.xp || 0;
             const xpMax = user.xpToNextLevel || 100;
             const xpPercentage = Math.min(100, Math.floor((userXp / xpMax) * 100));
-            const activeBadges = user.badges ? Object.keys(user.badges) : [];
-            const activePreQuizzes = user.preQuizCompleted ? Object.keys(user.preQuizCompleted) : [];
+            const isExpanded = expandedUserId === user.id;
 
             return (
-              <div key={user.id} className="user-card card-glow">
-                <div className="user-card-header">
-                  <span className="user-name">👤 {user.username}</span>
-                  <span className="user-level-badge">Lvl {userLvl}</span>
+              <div key={user.id} className="card-glow" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                
+                {/* Main Card Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                      👤 {user.name || '미등록 학습자'} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 400 }}>(ID: {user.username})</span>
+                    </h3>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                      📞 연락처: {user.phone || '미등록'} | 🕒 최근 활동: {user.updated_at ? new Date(user.updated_at).toLocaleString('ko-KR') : '기록 없음'}
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <span className="user-level-badge" style={{ fontSize: '0.85rem', padding: '6px 12px' }}>Lvl {userLvl}</span>
+                    <button 
+                      className="secondary-btn" 
+                      onClick={() => toggleExpandUser(user.id)}
+                      style={{ padding: '6px 16px', fontSize: '0.85rem' }}
+                    >
+                      {isExpanded ? '상세 닫기 ▲' : '상세 보기 ▼'}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="user-stats-list">
+                {/* Profile Summary & Simple Progress Bar */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
                   <div>
-                    <div className="stat-row">
+                    <div className="stat-row" style={{ fontSize: '0.85rem' }}>
                       <span className="stat-label">경험치 (XP)</span>
                       <span className="stat-value">{userXp} / {xpMax} XP ({xpPercentage}%)</span>
                     </div>
-                    <div className="progress-bar-container">
+                    <div className="progress-bar-container" style={{ height: '8px', marginTop: '6px' }}>
                       <div className="progress-bar-fill" style={{ width: `${xpPercentage}%` }}></div>
                     </div>
                   </div>
 
-                  <div className="stat-row">
-                    <span className="stat-label">최근 학습 일자</span>
-                    <span className="stat-value" style={{ fontSize: '0.8rem' }}>
-                      {user.updated_at ? new Date(user.updated_at).toLocaleString('ko-KR') : '학습 기록 없음'}
-                    </span>
-                  </div>
-
                   <div>
-                    <span className="stat-label" style={{ fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>
-                      사전 퀴즈 완료 ({activePreQuizzes.length})
-                    </span>
-                    {activePreQuizzes.length === 0 ? (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>완료된 퀴즈 없음</span>
-                    ) : (
-                      <div className="badge-grid-mini">
-                        {activePreQuizzes.map((q) => (
-                          <span key={q} className="badge-pill" style={{ background: 'rgba(14, 165, 233, 0.08)', borderColor: 'rgba(14, 165, 233, 0.15)', color: 'var(--color-neon-cyan)' }}>
-                            {formatPartName(q)}
-                          </span>
-                        ))}
+                    <span className="stat-label" style={{ fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>주요 사용 로봇</span>
+                    {user.careRobots && user.careRobots.length > 0 ? (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        {user.careRobots.map(robotId => {
+                          const robot = quizData.find(r => r.id === robotId);
+                          return (
+                            <span key={robotId} className="badge-pill" style={{ background: 'rgba(124, 58, 237, 0.05)', color: 'var(--color-primary)' }}>
+                              {robot ? `${robot.icon} ${robot.name}` : robotId}
+                            </span>
+                          );
+                        })}
                       </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <span className="stat-label" style={{ fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>
-                      획득한 명예 훈장/배지 ({activeBadges.length})
-                    </span>
-                    {activeBadges.length === 0 ? (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>획득한 배지 없음</span>
                     ) : (
-                      <div className="badge-grid-mini">
-                        {activeBadges.map((b) => (
-                          <span key={b} className="badge-pill">
-                            🏅 {formatPartName(b)}
-                          </span>
-                        ))}
-                      </div>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>로봇 정보 없음</span>
                     )}
                   </div>
                 </div>
+
+                {/* Expanded Details Section */}
+                {isExpanded && (
+                  <div className="slide-up-anim" style={{ marginTop: '16px', borderTop: '1px solid var(--border-color)', paddingTop: '20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+                    
+                    {/* Detailed Robot Progress % */}
+                    <div>
+                      <h4 style={{ fontWeight: 800, fontSize: '0.95rem', marginBottom: '12px' }}>📊 로봇별 진척도 (%)</h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {quizData.map(category => {
+                          const percent = getCategoryCompletionPercent(user.badges, category.id);
+                          return (
+                            <div key={category.id}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '3px' }}>
+                                <span style={{ fontWeight: 600 }}>{category.icon} {category.name}</span>
+                                <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{percent}%</span>
+                              </div>
+                              <div className="progress-bar-container" style={{ height: '6px' }}>
+                                <div 
+                                  className="progress-bar-fill" 
+                                  style={{ 
+                                    width: `${percent}%`, 
+                                    background: percent === 100 
+                                      ? 'linear-gradient(to right, var(--color-neon-cyan), var(--color-neon-green))' 
+                                      : 'var(--color-primary)'
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Timeline Activity Logs */}
+                    <div>
+                      <h4 style={{ fontWeight: 800, fontSize: '0.95rem', marginBottom: '12px' }}>🕒 최근 학습 히스토리</h4>
+                      {user.activities && user.activities.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '200px', overflowY: 'auto', paddingRight: '4px' }}>
+                          {user.activities.map((activity, idx) => (
+                            <div 
+                              key={idx} 
+                              style={{ 
+                                borderLeft: '2px solid var(--color-neon-pink)', 
+                                paddingLeft: '10px',
+                                fontSize: '0.8rem',
+                                display: 'flex',
+                                justifyContent: 'space-between'
+                              }}
+                            >
+                              <div>
+                                <strong style={{ color: 'var(--text-main)' }}>{activity.partTitle}</strong>
+                                <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                  {activity.categoryName} • {activity.quizType === 'pre' ? '사전 퀴즈' : '평가 퀴즈'}
+                                </span>
+                              </div>
+                              <div style={{ textAlign: 'right' }}>
+                                <span style={{ display: 'block', fontWeight: 700, color: 'var(--color-neon-green)' }}>{activity.score}점</span>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                                  {new Date(activity.completedAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>학습 로그 기록이 없습니다.</span>
+                      )}
+                    </div>
+
+                  </div>
+                )}
+
               </div>
             );
           })}

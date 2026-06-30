@@ -190,7 +190,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     return parts.map((part, index) => {
       if (index % 2 === 1) {
         return (
-          <strong key={index} style={{ fontWeight: 700 }}>
+          <strong key={index} style={{ color: 'var(--color-primary)', fontWeight: 800 }}>
             {part}
           </strong>
         );

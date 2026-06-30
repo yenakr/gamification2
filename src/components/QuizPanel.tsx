@@ -24,6 +24,7 @@ export const QuizPanel: React.FC<QuizPanelProps> = ({
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
   const [score, setScore] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
   const [shakeScreen, setShakeScreen] = useState(false);
 
@@ -50,6 +51,7 @@ export const QuizPanel: React.FC<QuizPanelProps> = ({
 
     if (isCorrect) {
       sfx.playCorrect();
+      setCorrectCount(prev => prev + 1);
       setStreak(prev => {
         const next = prev + 1;
         if (next > maxStreak) setMaxStreak(next);
@@ -81,7 +83,8 @@ export const QuizPanel: React.FC<QuizPanelProps> = ({
       setCurrentIdx(prev => prev + 1);
     } else {
       // Quiz finished successfully!
-      onComplete(score, maxStreak);
+      const percentageScore = Math.round((correctCount / questions.length) * 100);
+      onComplete(percentageScore, maxStreak);
     }
   };
 
@@ -94,6 +97,7 @@ export const QuizPanel: React.FC<QuizPanelProps> = ({
     setStreak(0);
     setMaxStreak(0);
     setScore(0);
+    setCorrectCount(0);
     setIsGameOver(false);
   };
 

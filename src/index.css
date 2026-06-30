@@ -733,14 +733,14 @@ button {
 }
 
 .explanation-box h4 {
-  font-size: 1.1rem;
+  font-size: 1.8rem;
   margin-bottom: 8px;
 }
 
 .exp-text {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  line-height: 1.5;
+  font-size: 1.5rem;
+  color: var(--text-main);
+  line-height: 1.6;
   margin-bottom: 16px;
 }
 

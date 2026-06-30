@@ -129,14 +129,22 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
 
       // Match headers H4, H5, H6
       if (line.startsWith('#### ') || line.startsWith('##### ') || line.startsWith('###### ')) {
+        const rawTitle = line.replace(/^#+\s*/, '').trim();
+
         // 이전 헤더가 있었으면 본문이 비어있어도 페이지로 등록 (큰 제목 누락 방지)
         if (hasStarted) {
           parsed.push({ title: cleanTitle(currentTitle), paragraphs: currentParagraphs, level: currentLevel });
           currentParagraphs = [];
         }
-        currentTitle = line.replace(/^#+\s*/, '').trim();
-        currentLevel = line.startsWith('###### ') ? 6 : 5;
-        hasStarted = true;
+
+        if (rawTitle === '학습하기') {
+          // '학습하기'는 투명 구분자로만 사용 — 페이지 생성 안 함
+          hasStarted = false;
+        } else {
+          currentTitle = rawTitle;
+          currentLevel = line.startsWith('###### ') ? 6 : 5;
+          hasStarted = true;
+        }
       } else if (line.startsWith('> ')) {
         // Blockquote: could be caption like "> [그림 1] 설명" or image "![alt](src)"
         currentParagraphs.push(line); // keep with '> ' prefix for rendering

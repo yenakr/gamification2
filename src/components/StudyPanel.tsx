@@ -261,8 +261,9 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                     <label htmlFor="chapter-select" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>이동:</label>
                     <select
                       id="chapter-select"
-                      value={currentPageIndex}
+                      value={pages[currentPageIndex] && (pages[currentPageIndex].title === '학습목표' || pages[currentPageIndex].title === '학습내용') ? 'placeholder' : currentPageIndex}
                       onChange={(e) => {
+                        if (e.target.value === 'placeholder') return;
                         sfx.playClick();
                         setCurrentPageIndex(Number(e.target.value));
                       }}
@@ -280,6 +281,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                         width: '100%'
                       }}
                     >
+                      <option value="placeholder" disabled hidden>📖 학습 목차 선택 (이동하기)</option>
                       {pages.map((p, idx) => {
                         if (p.title === '학습목표' || p.title === '학습내용') return null;
                         return (

@@ -51,6 +51,11 @@ export const QuestHub: React.FC<QuestHubProps> = ({
           const hasPreQuizDone = !!preQuizCompleted[`${category.id}-${part.id}`];
           const hasPostQuizDone = !!badges[`${category.id}-${part.id}`];
 
+          // 임시 검토를 위해 사전 퀴즈 완료 여부 상관없이 항상 잠금 해제 (나중에 복구 시 false로 변경 가능)
+          const BYPASS_PRE_QUIZ_REQUIREMENT = true;
+          const isStudyUnlocked = BYPASS_PRE_QUIZ_REQUIREMENT || hasPreQuizDone;
+          const isPostQuizUnlocked = BYPASS_PRE_QUIZ_REQUIREMENT || hasPreQuizDone;
+
           return (
             <div 
               key={part.id} 
@@ -70,20 +75,20 @@ export const QuestHub: React.FC<QuestHubProps> = ({
                   {hasPreQuizDone ? '✅ 사전 퀴즈 완료' : '🎯 사전 퀴즈'}
                 </button>
 
-                {/* Step 2: Study (unlocked after pre-quiz) */}
+                {/* Step 2: Study (unlocked after pre-quiz or bypassed) */}
                 <button 
-                  className={`action-chip ${hasPreQuizDone ? 'unlocked-study' : 'locked-study'}`}
-                  disabled={!hasPreQuizDone}
-                  onClick={() => handleSelect(part, 'study', !hasPreQuizDone)}
+                  className={`action-chip ${isStudyUnlocked ? 'unlocked-study' : 'locked-study'}`}
+                  disabled={!isStudyUnlocked}
+                  onClick={() => handleSelect(part, 'study', !isStudyUnlocked)}
                 >
                   📖 학습하기
                 </button>
 
-                {/* Step 3: Post-Quiz (unlocked after pre-quiz, badges show when finished) */}
+                {/* Step 3: Post-Quiz (unlocked after pre-quiz or bypassed, badges show when finished) */}
                 <button 
-                  className={`action-chip ${hasPostQuizDone ? 'victory-badge' : hasPreQuizDone ? 'unlocked-post' : 'locked-post'}`}
-                  disabled={!hasPreQuizDone}
-                  onClick={() => handleSelect(part, 'post', !hasPreQuizDone)}
+                  className={`action-chip ${hasPostQuizDone ? 'victory-badge' : isPostQuizUnlocked ? 'unlocked-post' : 'locked-post'}`}
+                  disabled={!isPostQuizUnlocked}
+                  onClick={() => handleSelect(part, 'post', !isPostQuizUnlocked)}
                 >
                   {hasPostQuizDone ? '🏆 평가 퀴즈 완료!' : '🔥 평가 퀴즈 도전'}
                 </button>

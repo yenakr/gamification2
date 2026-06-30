@@ -1296,8 +1296,8 @@ button {
 .book-page-content {
   background-image: 
     linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
-  background-size: 100% 2.2rem;
-  line-height: 2.2rem;
+  background-size: 100% 3.2rem;
+  line-height: 3.2rem;
 }
 
 .study-image-placeholder {

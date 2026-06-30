@@ -170,14 +170,14 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     // Check for list item
     if (text.startsWith('- ') || text.startsWith('* ')) {
       return (
-        <li key={idx} className="study-list-item" style={{ marginLeft: '16px', marginBottom: '8px', lineHeight: '1.6', fontSize: '1rem' }}>
+        <li key={idx} className="study-list-item" style={{ marginLeft: '16px', marginBottom: '16px', lineHeight: '1.7', fontSize: '1.7rem' }}>
           {parseBoldText(text.slice(2))}
         </li>
       );
     }
 
     return (
-      <p key={idx} className="study-text-para" style={{ marginBottom: '16px', lineHeight: '1.7', fontSize: '1.05rem', textAlign: 'justify' }}>
+      <p key={idx} className="study-text-para" style={{ marginBottom: '32px', lineHeight: '1.7', fontSize: '1.785rem', textAlign: 'justify' }}>
         {parseBoldText(text)}
       </p>
     );

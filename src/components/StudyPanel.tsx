@@ -115,6 +115,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     let currentTitle = '학습 개요';
     let currentLevel = 5;
     let currentParagraphs: string[] = [];
+    let hasStarted = false; // 첫 헤더 이전에는 push 안 함
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
@@ -127,12 +128,14 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
 
       // Match headers H4, H5, H6
       if (line.startsWith('#### ') || line.startsWith('##### ') || line.startsWith('###### ')) {
-        if (currentParagraphs.length > 0) {
+        // 이전 헤더가 있었으면 본문이 비어있어도 페이지로 등록 (큰 제목 누락 방지)
+        if (hasStarted) {
           parsed.push({ title: cleanTitle(currentTitle), paragraphs: currentParagraphs, level: currentLevel });
           currentParagraphs = [];
         }
         currentTitle = line.replace(/^#+\s*/, '').trim();
         currentLevel = line.startsWith('###### ') ? 6 : 5;
+        hasStarted = true;
       } else if (line.startsWith('> ')) {
         // Blockquote: could be caption like "> [그림 1] 설명" or image "![alt](src)"
         currentParagraphs.push(line); // keep with '> ' prefix for rendering
@@ -141,7 +144,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       }
     }
 
-    if (currentParagraphs.length > 0) {
+    if (hasStarted) {
       parsed.push({ title: cleanTitle(currentTitle), paragraphs: currentParagraphs, level: currentLevel });
     }
 

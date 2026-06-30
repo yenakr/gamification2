@@ -437,15 +437,6 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                   {/* level-5 큰제목 페이지에는 소제목 카드 인덱스를 먼저 표시 */}
                   {pages[currentPageIndex].level === 5 && pages[currentPageIndex].children && pages[currentPageIndex].children!.length > 0 && (
                     <div style={{ marginBottom: '36px' }}>
-                      <div style={{
-                        fontSize: '0.9rem', fontWeight: 700,
-                        color: 'var(--text-muted)',
-                        marginBottom: '14px',
-                        letterSpacing: '0.05em',
-                        textTransform: 'uppercase'
-                      }}>
-                        📚 이 체터의 학습 내용
-                      </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {pages[currentPageIndex].children!.map((child, ci) => (
                           <button

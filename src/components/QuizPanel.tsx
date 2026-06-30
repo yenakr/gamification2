@@ -23,7 +23,6 @@ export const QuizPanel: React.FC<QuizPanelProps> = ({
   const [hearts, setHearts] = useState(3);
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
-  const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
   const [shakeScreen, setShakeScreen] = useState(false);
@@ -57,7 +56,6 @@ export const QuizPanel: React.FC<QuizPanelProps> = ({
         if (next > maxStreak) setMaxStreak(next);
         return next;
       });
-      setScore(prev => prev + 10 + streak * 2); // bonus points for combos
     } else {
       sfx.playWrong();
       setStreak(0);
@@ -96,7 +94,6 @@ export const QuizPanel: React.FC<QuizPanelProps> = ({
     setHearts(3);
     setStreak(0);
     setMaxStreak(0);
-    setScore(0);
     setCorrectCount(0);
     setIsGameOver(false);
   };

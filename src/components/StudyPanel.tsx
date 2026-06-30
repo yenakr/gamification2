@@ -18,7 +18,7 @@ interface PageData {
 const categoryFileMapping: Record<string, string> = {
   transfer: '01_transfer.md',
   excretion: '02_toilet.md',
-  feeding: '03_feeding.md',
+  meal: '03_feeding.md',
   posture: '04_position.md',
   communication: '05_communication.md'
 };

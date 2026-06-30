@@ -222,7 +222,8 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     }
 
     // 1. Markdown image: ![alt text](/images/...)
-    const mdImageMatch = text.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    const cleanText = text.trim();
+    const mdImageMatch = cleanText.match(/^\!?\!\[([^\]]*)\]\(([^)]+)\)$/);
     if (mdImageMatch) {
       const altText = mdImageMatch[1];
       const src = mdImageMatch[2];
@@ -271,14 +272,13 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     // 2. Blockquote caption line: "> [그림 N] 설명" or "> [표 N] 설명"
     if (text.startsWith('> ')) {
       const captionContent = text.slice(2).trim();
-      // If it's a markdown image inside blockquote
-      const innerImgMatch = captionContent.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
-      if (innerImgMatch) {
+      // If it's a markdown image inside blockquote (e.g., > ![[그림 8] ...](/images/...))
+      if (captionContent.startsWith('![') && captionContent.endsWith(')')) {
         return renderParagraph(captionContent, idx);
       }
       // Otherwise render as styled caption label
-      const isFig = captionContent.startsWith('[그림') || captionContent.startsWith('[Figure');
-      const isTable = captionContent.startsWith('[표') || captionContent.startsWith('[Table');
+      const isFig = captionContent.includes('[그림') || captionContent.includes('[Figure');
+      const isTable = captionContent.includes('[표') || captionContent.includes('[Table');
       return (
         <div
           key={idx}

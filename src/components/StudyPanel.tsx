@@ -118,9 +118,13 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     let currentParagraphs: string[] = [];
     let hasStarted = false; // 첫 헤더 이전에는 push 안 함
 
-    for (let i = 0; i < lines.length; i++) {
+    let i = 0;
+    while (i < lines.length) {
       const line = lines[i].trim();
-      if (!line) continue;
+      if (!line) {
+        i++;
+        continue;
+      }
 
       // Stop parsing if we reach summary/wrap-up section
       if (line.startsWith('#### 정리하기')) {
@@ -145,12 +149,22 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
           currentLevel = line.startsWith('###### ') ? 6 : 5;
           hasStarted = true;
         }
+      } else if (line.startsWith('|')) {
+        // 표(Table) 구문 감지하여 한 덩어리로 묶음
+        let tableBlock = '';
+        while (i < lines.length && lines[i].trim().startsWith('|')) {
+          tableBlock += lines[i].trim() + '\n';
+          i++;
+        }
+        currentParagraphs.push('__TABLE_BLOCK__' + tableBlock.trim());
+        continue; // i++는 위 루프에서 이미 수행됨
       } else if (line.startsWith('> ')) {
         // Blockquote: could be caption like "> [그림 1] 설명" or image "![alt](src)"
         currentParagraphs.push(line); // keep with '> ' prefix for rendering
       } else {
         currentParagraphs.push(line);
       }
+      i++;
     }
 
     if (hasStarted) {
@@ -200,6 +214,59 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
   };
 
   const renderParagraph = (text: string, idx: number) => {
+    // 00. Table Block rendering
+    if (text.startsWith('__TABLE_BLOCK__')) {
+      const tableRaw = text.slice(15);
+      const rows = tableRaw.split('\n').map(r => r.trim()).filter(r => r.length > 0);
+      const filteredRows = rows.filter(r => !r.includes(':---') && !r.includes('---:'));
+      
+      if (filteredRows.length === 0) return null;
+
+      const parseCols = (rowStr: string) => {
+        let cols = rowStr.replace(/^\|/, '').replace(/\|$/, '').split('|');
+        return cols.map(c => c.trim());
+      };
+
+      const headers = parseCols(filteredRows[0]);
+      const bodyRows = filteredRows.slice(1).map(r => parseCols(r));
+
+      return (
+        <div key={idx} style={{ 
+          overflowX: 'auto', 
+          margin: '28px 0', 
+          borderRadius: '16px', 
+          border: '1px solid var(--border-color)', 
+          boxShadow: '0 8px 24px rgba(0,0,0,0.04)' 
+        }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1.35rem', textAlign: 'left', fontFamily: 'var(--font-game)' }}>
+            <thead>
+              <tr style={{ background: 'linear-gradient(135deg, var(--color-primary), #6366f1)', color: '#ffffff' }}>
+                {headers.map((h, hi) => (
+                  <th key={hi} style={{ padding: '18px 22px', fontWeight: 800 }}>
+                    {parseBoldText(h)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {bodyRows.map((row, ri) => (
+                <tr key={ri} style={{ 
+                  background: ri % 2 === 1 ? 'rgba(124, 58, 237, 0.02)' : 'var(--bg-secondary)',
+                  borderBottom: '1px solid var(--border-color)'
+                }}>
+                  {row.map((col, ci) => (
+                    <td key={ci} style={{ padding: '18px 22px', color: 'var(--text-main)', lineHeight: '1.6' }}>
+                      {parseBoldText(col)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+
     // 0. Standalone bold line: **제목** (전체 줄이 **...**인 경우 → 섹션 소제목)
     const standaloneBold = text.match(/^\*\*([^*]+)\*\*$/);
     if (standaloneBold) {

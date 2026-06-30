@@ -79,8 +79,10 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
   };
 
   const cleanTitle = (title: string) => {
-    return title.replace(/^([0-9]+(\.[0-9]+)*\s*)/, '').trim();
+    // "1. 제목", "1.2 제목", "1.2. 제목" 등에서 앞의 번호+점 제거
+    return title.replace(/^[0-9]+(\.[0-9]+)*\.?\s*/, '').trim();
   };
+
 
   const parsePartFromMarkdown = (text: string, partId: number): PageData[] => {
     // 1. Find all Part headers: ### Part Ⅰ. [Title]
@@ -395,52 +397,15 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                       }}
                     >
                       <option value="placeholder" disabled hidden>📖 학습 목차 선택 (이동하기)</option>
-                      {(() => {
-                        const items: React.ReactNode[] = [];
-                        let currentGroup: { label: string; groupIdx: number } | null = null;
-                        let groupOptions: React.ReactNode[] = [];
-
-                        const flushGroup = () => {
-                          if (currentGroup && groupOptions.length > 0) {
-                            items.push(
-                              <optgroup key={`g-${currentGroup.groupIdx}`} label={`  ${currentGroup.label}`}>
-                                {groupOptions}
-                              </optgroup>
-                            );
-                            groupOptions = [];
-                          }
-                        };
-
-                        pages.forEach((p, idx) => {
-                          if (p.title === '학습목표' || p.title === '학습내용') return;
-
-                          if (p.level === 5) {
-                            // 큰 제목 → 새 optgroup 시작
-                            flushGroup();
-                            currentGroup = { label: p.title, groupIdx: idx };
-                            // 큰 제목 자체도 선택 가능한 옵션으로 추가
-                            groupOptions.push(
-                              <option key={idx} value={idx} style={{ fontWeight: 700 }}>
-                                📌 {p.title}
-                              </option>
-                            );
-                          } else {
-                            // 소제목 → 현재 그룹에 들여쓰기 옵션
-                            const opt = (
-                              <option key={idx} value={idx}>
-                                {'　　'}{p.title}
-                              </option>
-                            );
-                            if (currentGroup) {
-                              groupOptions.push(opt);
-                            } else {
-                              items.push(opt);
-                            }
-                          }
-                        });
-                        flushGroup();
-                        return items;
-                      })()}
+                      {pages.map((p, idx) => {
+                        if (p.title === '학습목표' || p.title === '학습내용') return null;
+                        const isBig = p.level === 5;
+                        return (
+                          <option key={idx} value={idx}>
+                            {isBig ? `📌 ${p.title}` : `　　↳ ${p.title}`}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                 </div>

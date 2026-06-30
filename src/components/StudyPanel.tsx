@@ -186,7 +186,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
   };
 
   const parseBoldText = (text: string) => {
-    const parts = text.split(/\*\*([^*]+)\*\*/g);
+    const parts = text.split(/\*\*(.*?)\*\*/g);
     return parts.map((part, index) => {
       if (index % 2 === 1) {
         return (
@@ -222,51 +222,70 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     }
 
     // 1. Markdown image: ![alt text](/images/...)
+    // 정규식 오류 방지를 위해 시작과 끝 및 괄호 분리 연산 사용
     const cleanText = text.trim();
-    const mdImageMatch = cleanText.match(/^\!?\!\[([^\]]*)\]\(([^)]+)\)$/);
-    if (mdImageMatch) {
-      const altText = mdImageMatch[1];
-      const src = mdImageMatch[2];
-      return (
-        <figure key={idx} style={{ margin: '24px 0', textAlign: 'center' }}>
-          <img
-            src={src}
-            alt={altText}
-            style={{
-              maxWidth: '100%',
-              borderRadius: '12px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-              border: '1px solid var(--border-color)'
-            }}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = 'none';
-              const sibling = e.currentTarget.nextElementSibling as HTMLElement;
-              if (sibling) sibling.style.display = 'flex';
-            }}
-          />
-          <div
-            style={{
-              display: 'none',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              padding: '20px',
-              background: 'var(--bg-secondary)',
-              borderRadius: '12px',
-              border: '1px dashed var(--border-color)',
-              color: 'var(--text-muted)',
-              fontSize: '0.9rem'
-            }}
-          >
-            <span>🖼️</span><span>{altText} (이미지 로드 실패)</span>
-          </div>
-          {altText && (
-            <figcaption style={{ marginTop: '8px', fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-              {altText}
-            </figcaption>
-          )}
-        </figure>
-      );
+    if (cleanText.startsWith('![') && cleanText.endsWith(')')) {
+      const lastOpenParen = cleanText.lastIndexOf('(');
+      if (lastOpenParen !== -1) {
+        const altPart = cleanText.slice(0, lastOpenParen).trim();
+        const srcPart = cleanText.slice(lastOpenParen + 1, cleanText.length - 1).trim();
+        
+        let altText = altPart;
+        if (altPart.startsWith('![') && altPart.endsWith(']')) {
+          altText = altPart.slice(2, altPart.length - 1).trim();
+          // [그림 8] 과 같이 대괄호가 중복된 경우 내부 대괄호만 추출
+          if (altText.startsWith('[') && altText.endsWith(']')) {
+            altText = altText.slice(1, altText.length - 1).trim();
+          }
+        }
+
+        return (
+          <figure key={idx} style={{ margin: '24px 0', textAlign: 'center' }}>
+            <img
+              src={srcPart}
+              alt={altText}
+              style={{
+                maxWidth: '100%',
+                borderRadius: '12px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                border: '1px solid var(--border-color)'
+              }}
+              onError={(e) => {
+                // 이미지가 없을 때 에러 패널 노출
+                e.currentTarget.style.display = 'none';
+                const sibling = e.currentTarget.nextElementSibling as HTMLElement;
+                if (sibling) sibling.style.display = 'flex';
+              }}
+            />
+            <div
+              style={{
+                display: 'none',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '24px',
+                background: 'rgba(239, 68, 68, 0.05)',
+                borderRadius: '12px',
+                border: '1px dashed #ef4444',
+                color: '#ef4444',
+                fontSize: '0.95rem'
+              }}
+            >
+              <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+              <span style={{ fontWeight: 700 }}>이미지 리소스 로드 실패</span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                설정 경로: {srcPart}
+              </span>
+            </div>
+            {altText && (
+              <figcaption style={{ marginTop: '8px', fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                {altText}
+              </figcaption>
+            )}
+          </figure>
+        );
+      }
     }
 
     // 2. Blockquote caption line: "> [그림 N] 설명" or "> [표 N] 설명"

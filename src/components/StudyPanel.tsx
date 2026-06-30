@@ -127,6 +127,9 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
           currentParagraphs = [];
         }
         currentTitle = line.replace(/^#+\s*/, '').trim();
+      } else if (line.startsWith('> ')) {
+        // Blockquote: could be caption like "> [그림 1] 설명" or image "![alt](src)"
+        currentParagraphs.push(line); // keep with '> ' prefix for rendering
       } else {
         currentParagraphs.push(line);
       }
@@ -168,7 +171,92 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
   };
 
   const renderParagraph = (text: string, idx: number) => {
-    // Check if it's an image/fig/table placeholder (e.g. transfer_table1, transfer_fig2)
+    // 1. Markdown image: ![alt text](/images/...)
+    const mdImageMatch = text.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (mdImageMatch) {
+      const altText = mdImageMatch[1];
+      const src = mdImageMatch[2];
+      return (
+        <figure key={idx} style={{ margin: '24px 0', textAlign: 'center' }}>
+          <img
+            src={src}
+            alt={altText}
+            style={{
+              maxWidth: '100%',
+              borderRadius: '12px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+              border: '1px solid var(--border-color)'
+            }}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'none';
+              const sibling = e.currentTarget.nextElementSibling as HTMLElement;
+              if (sibling) sibling.style.display = 'flex';
+            }}
+          />
+          <div
+            style={{
+              display: 'none',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '20px',
+              background: 'var(--bg-secondary)',
+              borderRadius: '12px',
+              border: '1px dashed var(--border-color)',
+              color: 'var(--text-muted)',
+              fontSize: '0.9rem'
+            }}
+          >
+            <span>🖼️</span><span>{altText} (이미지 로드 실패)</span>
+          </div>
+          {altText && (
+            <figcaption style={{ marginTop: '8px', fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+              {altText}
+            </figcaption>
+          )}
+        </figure>
+      );
+    }
+
+    // 2. Blockquote caption line: "> [그림 N] 설명" or "> [표 N] 설명"
+    if (text.startsWith('> ')) {
+      const captionContent = text.slice(2).trim();
+      // If it's a markdown image inside blockquote
+      const innerImgMatch = captionContent.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+      if (innerImgMatch) {
+        return renderParagraph(captionContent, idx);
+      }
+      // Otherwise render as styled caption label
+      const isFig = captionContent.startsWith('[그림') || captionContent.startsWith('[Figure');
+      const isTable = captionContent.startsWith('[표') || captionContent.startsWith('[Table');
+      return (
+        <div
+          key={idx}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            margin: '8px 0 4px 0',
+            padding: '6px 14px',
+            borderRadius: '20px',
+            background: isFig
+              ? 'linear-gradient(90deg, rgba(99,102,241,0.12), rgba(168,85,247,0.08))'
+              : isTable
+              ? 'linear-gradient(90deg, rgba(16,185,129,0.12), rgba(5,150,105,0.08))'
+              : 'var(--bg-secondary)',
+            border: `1px solid ${isFig ? 'rgba(99,102,241,0.3)' : isTable ? 'rgba(16,185,129,0.3)' : 'var(--border-color)'}`,
+            fontSize: '0.85rem',
+            fontWeight: 700,
+            color: isFig ? 'rgba(139,92,246,1)' : isTable ? 'rgba(16,185,129,1)' : 'var(--text-muted)'
+          }}
+        >
+          <span>{isFig ? '🖼️' : isTable ? '📋' : '📌'}</span>
+          <span>{captionContent}</span>
+        </div>
+      );
+    }
+
+    // 3. Legacy image/fig/table placeholder (e.g. transfer_table1, transfer_fig2)
     const isImagePlaceholder = /^[a-zA-Z0-9]+_(table|fig|fig_table)[0-9]+$/i.test(text.trim());
     if (isImagePlaceholder) {
       const placeholderName = text.trim();
@@ -197,7 +285,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       );
     }
 
-    // Check for list item
+    // 4. List item
     if (text.startsWith('- ') || text.startsWith('* ')) {
       return (
         <li key={idx} className="study-list-item" style={{ marginLeft: '16px', marginBottom: '16px', lineHeight: '1.7', fontSize: '1.7rem' }}>

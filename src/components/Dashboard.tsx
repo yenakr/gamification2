@@ -29,6 +29,7 @@ interface DashboardProps {
   profile: UserProfile | null;
   onEditProfile: () => void;
   activities: ActivityLog[];
+  isGuest?: boolean;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -41,7 +42,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onToggleMute,
   profile,
   onEditProfile,
-  activities
+  activities,
+  isGuest = false
 }) => {
   const [showXpModal, setShowXpModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'map' | 'report'>('map');
@@ -99,16 +101,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
         <div className="header-actions" style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            className="secondary-btn"
-            style={{ padding: '8px 16px', fontSize: '0.85rem' }}
-            onClick={() => {
-              sfx.playClick();
-              onEditProfile();
-            }}
-          >
-            👤 프로필 설정
-          </button>
+          {!isGuest && (
+            <button 
+              className="secondary-btn"
+              style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+              onClick={() => {
+                sfx.playClick();
+                onEditProfile();
+              }}
+            >
+              👤 프로필 설정
+            </button>
+          )}
           <button 
             className="mute-btn" 
             onClick={() => {
@@ -262,50 +266,62 @@ export const Dashboard: React.FC<DashboardProps> = ({
               
               {/* Profile Details Card */}
               <div className="card-glow" style={{ padding: '24px', textAlign: 'left' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <h3 style={{ fontWeight: 800, fontSize: '1.15rem' }}>👤 나의 프로필 정보</h3>
-                  <button 
-                    className="secondary-btn" 
-                    onClick={onEditProfile}
-                    style={{ padding: '4px 12px', fontSize: '0.75rem', borderRadius: '15px' }}
-                  >
-                    수정
-                  </button>
-                </div>
-                
-                {profile ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.9rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>이름(실명)</span>
-                      <strong style={{ color: 'var(--text-main)' }}>{profile.name}</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>전화번호</span>
-                      <strong style={{ color: 'var(--text-main)' }}>{profile.phone}</strong>
-                    </div>
-                    <div>
-                      <span style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>주요 돌봄로봇</span>
-                      {profile.careRobots && profile.careRobots.length > 0 ? (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                          {profile.careRobots.map(robotId => {
-                            const robot = quizData.find(r => r.id === robotId);
-                            return (
-                              <span key={robotId} className="badge-pill">
-                                {robot ? `${robot.icon} ${robot.name}` : robotId}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <span style={{ fontStyle: 'italic', fontSize: '0.8rem', color: 'var(--text-muted)' }}>등록된 로봇 없음</span>
-                      )}
-                    </div>
+                {isGuest ? (
+                  <div>
+                    <h3 style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: '8px' }}>👤 게스트 모드</h3>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: 0, lineHeight: '1.6' }}>
+                      게스트 모드로 간편 체험 중입니다.<br />
+                      회원가입 후 로그인하시면 학습 이력 저장과 프로필 등록이 가능합니다.
+                    </p>
                   </div>
                 ) : (
-                  <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                    프로필 정보가 등록되지 않았습니다.<br />
-                    [수정] 버튼을 눌러 등록해주세요.
-                  </div>
+                  <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <h3 style={{ fontWeight: 800, fontSize: '1.15rem' }}>👤 나의 프로필 정보</h3>
+                      <button 
+                        className="secondary-btn" 
+                        onClick={onEditProfile}
+                        style={{ padding: '4px 12px', fontSize: '0.75rem', borderRadius: '15px' }}
+                      >
+                        수정
+                      </button>
+                    </div>
+                    
+                    {profile ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.9rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: 'var(--text-muted)' }}>이름(실명)</span>
+                          <strong style={{ color: 'var(--text-main)' }}>{profile.name}</strong>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: 'var(--text-muted)' }}>전화번호</span>
+                          <strong style={{ color: 'var(--text-main)' }}>{profile.phone}</strong>
+                        </div>
+                        <div>
+                          <span style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>주요 돌봄로봇</span>
+                          {profile.careRobots && profile.careRobots.length > 0 ? (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                              {profile.careRobots.map(robotId => {
+                                const robot = quizData.find(r => r.id === robotId);
+                                return (
+                                  <span key={robotId} className="badge-pill">
+                                    {robot ? `${robot.icon} ${robot.name}` : robotId}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <span style={{ fontStyle: 'italic', fontSize: '0.8rem', color: 'var(--text-muted)' }}>등록된 로봇 없음</span>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                        프로필 정보가 등록되지 않았습니다.<br />
+                        [수정] 버튼을 눌러 등록해주세요.
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 

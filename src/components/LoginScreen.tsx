@@ -130,7 +130,7 @@ export function LoginScreen({ onLoginSuccess, onGuestLogin }: LoginScreenProps) 
           onClick={onGuestLogin}
           disabled={isLoading}
         >
-          로그인 없이 학습하기 (저장 안 됨)
+          게스트로 체험하기
         </button>
 
         <div className="auth-toggle-text">

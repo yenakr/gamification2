@@ -192,8 +192,6 @@ function App() {
       role: 'guest'
     });
     setScreen('dashboard');
-    // For guest, show profile creation on login
-    setShowProfileModal(true);
   };
 
   const handleLogout = () => {
@@ -394,6 +392,7 @@ function App() {
           profile={profile}
           onEditProfile={() => setShowProfileModal(true)}
           activities={activities}
+          isGuest={user.role === 'guest'}
         />
       )}
 

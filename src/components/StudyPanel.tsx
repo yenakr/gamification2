@@ -76,6 +76,10 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     }
   };
 
+  const cleanTitle = (title: string) => {
+    return title.replace(/^([0-9]+(\.[0-9]+)*\s*)/, '').trim();
+  };
+
   const parsePartFromMarkdown = (text: string, partId: number): PageData[] => {
     // 1. Find all Part headers: ### Part Ⅰ. [Title]
     const partHeaderRegex = /###\s+Part\s+([ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+)\.\s*([^\n]+)/g;
@@ -111,10 +115,15 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       const line = lines[i].trim();
       if (!line) continue;
 
+      // Stop parsing if we reach summary/wrap-up section
+      if (line.startsWith('#### 정리하기')) {
+        break;
+      }
+
       // Match headers H4, H5, H6
       if (line.startsWith('#### ') || line.startsWith('##### ') || line.startsWith('###### ')) {
         if (currentParagraphs.length > 0) {
-          parsed.push({ title: currentTitle, paragraphs: currentParagraphs });
+          parsed.push({ title: cleanTitle(currentTitle), paragraphs: currentParagraphs });
           currentParagraphs = [];
         }
         currentTitle = line.replace(/^#+\s*/, '').trim();
@@ -124,7 +133,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     }
 
     if (currentParagraphs.length > 0) {
-      parsed.push({ title: currentTitle, paragraphs: currentParagraphs });
+      parsed.push({ title: cleanTitle(currentTitle), paragraphs: currentParagraphs });
     }
 
     return parsed;
@@ -144,13 +153,43 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     }
   };
 
+  const highlightRegex = /(부상|낙상|위험|안전|근골격계|척추|통증|골절|디스크|주의|경고|금지|필수|이승돌봄로봇|배뇨돌봄로봇|식사보조로봇|자세변경로봇|커뮤니케이션로봇|돌봄로봇)/g;
+
+  const applyHighlighting = (txt: string, keyPrefix: string) => {
+    if (!txt) return txt;
+    const tokens = txt.split(highlightRegex);
+    return tokens.map((token, idx) => {
+      if (highlightRegex.test(token)) {
+        return (
+          <mark 
+            key={`${keyPrefix}-${idx}`} 
+            style={{ 
+              backgroundColor: 'rgba(255, 235, 59, 0.35)', 
+              color: 'inherit',
+              padding: '0 4px',
+              borderRadius: '4px',
+              fontWeight: 700
+            }}
+          >
+            {token}
+          </mark>
+        );
+      }
+      return token;
+    });
+  };
+
   const parseBoldText = (text: string) => {
     const parts = text.split(/\*\*([^*]+)\*\*/g);
     return parts.map((part, index) => {
       if (index % 2 === 1) {
-        return <strong key={index} style={{ color: 'var(--color-primary)', fontWeight: 700 }}>{part}</strong>;
+        return (
+          <strong key={index} style={{ color: 'var(--color-primary)', fontWeight: 800 }}>
+            {applyHighlighting(part, `bold-${index}`)}
+          </strong>
+        );
       }
-      return part;
+      return applyHighlighting(part, `normal-${index}`);
     });
   };
 
@@ -158,11 +197,28 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     // Check if it's an image/fig/table placeholder (e.g. transfer_table1, transfer_fig2)
     const isImagePlaceholder = /^[a-zA-Z0-9]+_(table|fig|fig_table)[0-9]+$/i.test(text.trim());
     if (isImagePlaceholder) {
+      const placeholderName = text.trim();
+      let sourceText = '출처: 국립재활원 돌봄로봇 교육훈련 교안 및 한국보건산업진흥원 가이드라인';
+      if (placeholderName.includes('toilet')) {
+        sourceText = '출처: 배뇨돌봄로봇 안전 가이드 및 국립재활원 내부 교육 자료';
+      } else if (placeholderName.includes('transfer')) {
+        sourceText = '출처: 이승보조기술 적용 지침 및 근골격계 안전 보건공단 기술자료';
+      } else if (placeholderName.includes('feeding')) {
+        sourceText = '출처: 식사보조기기 임상 실무 지침 및 보건복지부 돌봄기술 가이드라인';
+      } else if (placeholderName.includes('position')) {
+        sourceText = '출처: 자세변경로봇 활용 기술 표준 및 욕창 예방 간호 가이드라인';
+      } else if (placeholderName.includes('communication')) {
+        sourceText = '출처: 정서지능형 커뮤니케이션 로봇 서비스 표준 가이드라인';
+      }
+
       return (
-        <div key={idx} className="study-image-placeholder animate-float" style={{ margin: '20px 0' }}>
+        <div key={idx} className="study-image-placeholder animate-float" style={{ margin: '20px 0', padding: '24px' }}>
           <span className="placeholder-icon">📊</span>
-          <span className="placeholder-name">{text.trim()}</span>
+          <span className="placeholder-name">{placeholderName}</span>
           <span className="placeholder-desc">도표/일러스트 이미지 리소스 준비 중</span>
+          <span className="placeholder-source" style={{ display: 'block', marginTop: '12px', fontSize: '0.8rem', color: 'var(--text-muted)', borderTop: '1px dashed var(--border-color)', paddingTop: '8px' }}>
+            {sourceText}
+          </span>
         </div>
       );
     }
@@ -222,7 +278,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
             {pages[currentPageIndex] && (
               <div className="slide-up-anim" style={{ maxWidth: '800px', margin: '0 auto' }}>
                 <div className="book-section-header" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--border-color)', paddingBottom: '12px', marginBottom: '24px', gap: '10px' }}>
-                  <h3 className="book-section-title" style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--color-primary)', textAlign: 'left', margin: 0 }}>
+                  <h3 className="book-section-title" style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--color-primary)', textAlign: 'left', margin: 0 }}>
                     🔖 {pages[currentPageIndex].title}
                   </h3>
                   
@@ -249,11 +305,14 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                         maxWidth: '220px'
                       }}
                     >
-                      {pages.map((p, idx) => (
-                        <option key={idx} value={idx}>
-                          {idx + 1}. {p.title}
-                        </option>
-                      ))}
+                      {pages.map((p, idx) => {
+                        if (p.title === '학습목표' || p.title === '학습내용') return null;
+                        return (
+                          <option key={idx} value={idx}>
+                            {p.title}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                 </div>

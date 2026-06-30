@@ -149,11 +149,12 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
           currentLevel = line.startsWith('###### ') ? 6 : 5;
           hasStarted = true;
         }
-      } else if (line.startsWith('|')) {
+      } else if (/^\s*\|/.test(line)) {
         // 표(Table) 구문 감지하여 한 덩어리로 묶음
         let tableBlock = '';
-        while (i < lines.length && lines[i].trim().startsWith('|')) {
-          tableBlock += lines[i].trim() + '\n';
+        while (i < lines.length && /^\s*\|/.test(lines[i])) {
+          // 각 라인 끝에 붙어있을 수 있는 \r 문자나 공백 제거 후 결합
+          tableBlock += lines[i].replace(/\r$/, '').trim() + '\n';
           i++;
         }
         currentParagraphs.push('__TABLE_BLOCK__' + tableBlock.trim());

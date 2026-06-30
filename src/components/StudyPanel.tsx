@@ -17,7 +17,7 @@ interface PageData {
 
 const categoryFileMapping: Record<string, string> = {
   transfer: '01_transfer.md',
-  toilet: '02_toilet.md',
+  excretion: '02_toilet.md',
   feeding: '03_feeding.md',
   posture: '04_position.md',
   communication: '05_communication.md'
@@ -153,43 +153,17 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     }
   };
 
-  const highlightRegex = /(부상|낙상|위험|안전|근골격계|척추|통증|골절|디스크|주의|경고|금지|필수|이승돌봄로봇|배뇨돌봄로봇|식사보조로봇|자세변경로봇|커뮤니케이션로봇|돌봄로봇)/g;
-
-  const applyHighlighting = (txt: string, keyPrefix: string) => {
-    if (!txt) return txt;
-    const tokens = txt.split(highlightRegex);
-    return tokens.map((token, idx) => {
-      if (highlightRegex.test(token)) {
-        return (
-          <mark 
-            key={`${keyPrefix}-${idx}`} 
-            style={{ 
-              backgroundColor: 'rgba(255, 235, 59, 0.35)', 
-              color: 'inherit',
-              padding: '0 4px',
-              borderRadius: '4px',
-              fontWeight: 700
-            }}
-          >
-            {token}
-          </mark>
-        );
-      }
-      return token;
-    });
-  };
-
   const parseBoldText = (text: string) => {
     const parts = text.split(/\*\*([^*]+)\*\*/g);
     return parts.map((part, index) => {
       if (index % 2 === 1) {
         return (
           <strong key={index} style={{ color: 'var(--color-primary)', fontWeight: 800 }}>
-            {applyHighlighting(part, `bold-${index}`)}
+            {part}
           </strong>
         );
       }
-      return applyHighlighting(part, `normal-${index}`);
+      return part;
     });
   };
 
@@ -277,14 +251,14 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
           <div className="book-page-content" style={{ flex: 1, padding: '40px 30px', overflowY: 'auto' }}>
             {pages[currentPageIndex] && (
               <div className="slide-up-anim" style={{ maxWidth: '800px', margin: '0 auto' }}>
-                <div className="book-section-header" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--border-color)', paddingBottom: '12px', marginBottom: '24px', gap: '10px' }}>
+                <div className="book-section-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', borderBottom: '2px solid var(--border-color)', paddingBottom: '12px', marginBottom: '24px', gap: '14px' }}>
                   <h3 className="book-section-title" style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--color-primary)', textAlign: 'left', margin: 0 }}>
                     🔖 {pages[currentPageIndex].title}
                   </h3>
                   
                   {/* Quick Chapter Navigation Dropdown */}
-                  <div className="chapter-nav-dropdown" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <label htmlFor="chapter-select" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>이동:</label>
+                  <div className="chapter-nav-dropdown" style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+                    <label htmlFor="chapter-select" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>이동:</label>
                     <select
                       id="chapter-select"
                       value={currentPageIndex}
@@ -293,16 +267,17 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                         setCurrentPageIndex(Number(e.target.value));
                       }}
                       style={{
-                        padding: '6px 12px',
+                        padding: '8px 16px',
                         borderRadius: '10px',
                         border: '1px solid var(--border-color)',
                         backgroundColor: 'var(--bg-secondary)',
                         fontFamily: 'var(--font-game)',
-                        fontSize: '0.9rem',
+                        fontSize: '0.95rem',
                         fontWeight: 600,
                         color: 'var(--text-main)',
                         cursor: 'pointer',
-                        maxWidth: '220px'
+                        flex: 1,
+                        width: '100%'
                       }}
                     >
                       {pages.map((p, idx) => {

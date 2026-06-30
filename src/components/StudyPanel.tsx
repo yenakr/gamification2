@@ -13,6 +13,7 @@ interface StudyPanelProps {
 interface PageData {
   title: string;
   paragraphs: string[];
+  level: number; // 5 = ##### 큰 제목, 6 = ###### 소제목
 }
 
 const categoryFileMapping: Record<string, string> = {
@@ -69,7 +70,8 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       // Fallback to static slides if md loading fails
       setPages(part.studySlides.map((slide, idx) => ({
         title: `${part.title} - 슬라이드 ${idx + 1}`,
-        paragraphs: slide.split('\n')
+        paragraphs: slide.split('\n'),
+        level: 5
       })));
     } finally {
       setLoading(false);
@@ -109,6 +111,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     const lines = partContent.split('\n');
     const parsed: PageData[] = [];
     let currentTitle = '학습 개요';
+    let currentLevel = 5;
     let currentParagraphs: string[] = [];
 
     for (let i = 0; i < lines.length; i++) {
@@ -123,10 +126,11 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       // Match headers H4, H5, H6
       if (line.startsWith('#### ') || line.startsWith('##### ') || line.startsWith('###### ')) {
         if (currentParagraphs.length > 0) {
-          parsed.push({ title: cleanTitle(currentTitle), paragraphs: currentParagraphs });
+          parsed.push({ title: cleanTitle(currentTitle), paragraphs: currentParagraphs, level: currentLevel });
           currentParagraphs = [];
         }
         currentTitle = line.replace(/^#+\s*/, '').trim();
+        currentLevel = line.startsWith('###### ') ? 6 : 5;
       } else if (line.startsWith('> ')) {
         // Blockquote: could be caption like "> [그림 1] 설명" or image "![alt](src)"
         currentParagraphs.push(line); // keep with '> ' prefix for rendering
@@ -136,7 +140,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     }
 
     if (currentParagraphs.length > 0) {
-      parsed.push({ title: cleanTitle(currentTitle), paragraphs: currentParagraphs });
+      parsed.push({ title: cleanTitle(currentTitle), paragraphs: currentParagraphs, level: currentLevel });
     }
 
     return parsed;
@@ -161,7 +165,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     return parts.map((part, index) => {
       if (index % 2 === 1) {
         return (
-          <strong key={index} style={{ color: 'var(--color-primary)', fontWeight: 800 }}>
+          <strong key={index} style={{ fontWeight: 700 }}>
             {part}
           </strong>
         );
@@ -171,6 +175,27 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
   };
 
   const renderParagraph = (text: string, idx: number) => {
+    // 0. Standalone bold line: **제목** (전체 줄이 **...**인 경우 → 섹션 소제목)
+    const standaloneBold = text.match(/^\*\*([^*]+)\*\*$/);
+    if (standaloneBold) {
+      return (
+        <div
+          key={idx}
+          style={{
+            margin: '28px 0 10px 0',
+            paddingLeft: '12px',
+            borderLeft: '3px solid var(--color-primary)',
+            fontSize: '1.55rem',
+            fontWeight: 800,
+            color: 'var(--color-primary)',
+            lineHeight: 1.4
+          }}
+        >
+          {standaloneBold[1]}
+        </div>
+      );
+    }
+
     // 1. Markdown image: ![alt text](/images/...)
     const mdImageMatch = text.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
     if (mdImageMatch) {
@@ -370,14 +395,52 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                       }}
                     >
                       <option value="placeholder" disabled hidden>📖 학습 목차 선택 (이동하기)</option>
-                      {pages.map((p, idx) => {
-                        if (p.title === '학습목표' || p.title === '학습내용') return null;
-                        return (
-                          <option key={idx} value={idx}>
-                            {p.title}
-                          </option>
-                        );
-                      })}
+                      {(() => {
+                        const items: React.ReactNode[] = [];
+                        let currentGroup: { label: string; groupIdx: number } | null = null;
+                        let groupOptions: React.ReactNode[] = [];
+
+                        const flushGroup = () => {
+                          if (currentGroup && groupOptions.length > 0) {
+                            items.push(
+                              <optgroup key={`g-${currentGroup.groupIdx}`} label={`  ${currentGroup.label}`}>
+                                {groupOptions}
+                              </optgroup>
+                            );
+                            groupOptions = [];
+                          }
+                        };
+
+                        pages.forEach((p, idx) => {
+                          if (p.title === '학습목표' || p.title === '학습내용') return;
+
+                          if (p.level === 5) {
+                            // 큰 제목 → 새 optgroup 시작
+                            flushGroup();
+                            currentGroup = { label: p.title, groupIdx: idx };
+                            // 큰 제목 자체도 선택 가능한 옵션으로 추가
+                            groupOptions.push(
+                              <option key={idx} value={idx} style={{ fontWeight: 700 }}>
+                                📌 {p.title}
+                              </option>
+                            );
+                          } else {
+                            // 소제목 → 현재 그룹에 들여쓰기 옵션
+                            const opt = (
+                              <option key={idx} value={idx}>
+                                {'　　'}{p.title}
+                              </option>
+                            );
+                            if (currentGroup) {
+                              groupOptions.push(opt);
+                            } else {
+                              items.push(opt);
+                            }
+                          }
+                        });
+                        flushGroup();
+                        return items;
+                      })()}
                     </select>
                   </div>
                 </div>

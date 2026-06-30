@@ -14,6 +14,7 @@ interface PageData {
   title: string;
   paragraphs: string[];
   level: number; // 5 = ##### 큰 제목, 6 = ###### 소제목
+  children?: { title: string; pageIndex: number }[]; // level-5 페이지의 하위 소제목
 }
 
 const categoryFileMapping: Record<string, string> = {
@@ -146,6 +147,17 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
 
     if (hasStarted) {
       parsed.push({ title: cleanTitle(currentTitle), paragraphs: currentParagraphs, level: currentLevel });
+    }
+
+    // level-5 페이지에 하위 level-6 페이지들을 children으로 연결
+    for (let i = 0; i < parsed.length; i++) {
+      if (parsed[i].level === 5) {
+        const children: { title: string; pageIndex: number }[] = [];
+        for (let j = i + 1; j < parsed.length && parsed[j].level === 6; j++) {
+          children.push({ title: parsed[j].title, pageIndex: j });
+        }
+        parsed[i].children = children;
+      }
     }
 
     return parsed;
@@ -414,6 +426,59 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                 </div>
                 
                 <div className="book-paragraphs" style={{ color: 'var(--text-main)' }}>
+                  {/* level-5 큰제목 페이지에는 소제목 카드 인덱스를 먼저 표시 */}
+                  {pages[currentPageIndex].level === 5 && pages[currentPageIndex].children && pages[currentPageIndex].children!.length > 0 && (
+                    <div style={{ marginBottom: '36px' }}>
+                      <div style={{
+                        fontSize: '0.9rem', fontWeight: 700,
+                        color: 'var(--text-muted)',
+                        marginBottom: '14px',
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase'
+                      }}>
+                        📚 이 체터의 학습 내용
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {pages[currentPageIndex].children!.map((child, ci) => (
+                          <button
+                            key={child.pageIndex}
+                            onClick={() => { sfx.playClick(); setCurrentPageIndex(child.pageIndex); }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '14px',
+                              padding: '14px 20px',
+                              borderRadius: '12px',
+                              border: '1px solid var(--border-color)',
+                              background: 'var(--bg-secondary)',
+                              color: 'var(--text-main)',
+                              fontSize: '1.1rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--color-primary)')}
+                            onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border-color)')}
+                          >
+                            <span style={{
+                              minWidth: '28px', height: '28px',
+                              borderRadius: '50%',
+                              background: 'var(--color-primary)',
+                              color: '#fff',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: '0.85rem', fontWeight: 800, flexShrink: 0
+                            }}>{ci + 1}</span>
+                            <span>{child.title}</span>
+                            <span style={{ marginLeft: 'auto', color: 'var(--text-muted)', fontSize: '1rem' }}>▶</span>
+                          </button>
+                        ))}
+                      </div>
+                      {pages[currentPageIndex].paragraphs.length > 0 && (
+                        <hr style={{ margin: '28px 0', borderColor: 'var(--border-color)', opacity: 0.5 }} />
+                      )}
+                    </div>
+                  )}
                   {pages[currentPageIndex].paragraphs.map((p, idx) => renderParagraph(p, idx))}
                 </div>
               </div>

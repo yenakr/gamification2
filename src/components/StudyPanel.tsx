@@ -238,17 +238,20 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
             altText = altText.slice(1, altText.length - 1).trim();
           }
         }
-
         return (
-          <figure key={idx} style={{ margin: '24px 0', textAlign: 'center' }}>
+          <figure key={idx} style={{ margin: '24px auto', textAlign: 'center', maxWidth: '75%' }}>
             <img
               src={srcPart}
               alt={altText}
               style={{
                 maxWidth: '100%',
+                maxHeight: '360px',
+                objectFit: 'contain',
                 borderRadius: '12px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                border: '1px solid var(--border-color)'
+                boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                border: '1px solid var(--border-color)',
+                display: 'block',
+                margin: '0 auto'
               }}
               onError={(e) => {
                 // 이미지가 없을 때 에러 패널 노출
@@ -279,7 +282,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
               </span>
             </div>
             {altText && (
-              <figcaption style={{ marginTop: '8px', fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+              <figcaption style={{ marginTop: '10px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                 {altText}
               </figcaption>
             )}
@@ -295,34 +298,8 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       if (captionContent.startsWith('![') && captionContent.endsWith(')')) {
         return renderParagraph(captionContent, idx);
       }
-      // Otherwise render as styled caption label
-      const isFig = captionContent.includes('[그림') || captionContent.includes('[Figure');
-      const isTable = captionContent.includes('[표') || captionContent.includes('[Table');
-      return (
-        <div
-          key={idx}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            margin: '8px 0 4px 0',
-            padding: '6px 14px',
-            borderRadius: '20px',
-            background: isFig
-              ? 'linear-gradient(90deg, rgba(99,102,241,0.12), rgba(168,85,247,0.08))'
-              : isTable
-              ? 'linear-gradient(90deg, rgba(16,185,129,0.12), rgba(5,150,105,0.08))'
-              : 'var(--bg-secondary)',
-            border: `1px solid ${isFig ? 'rgba(99,102,241,0.3)' : isTable ? 'rgba(16,185,129,0.3)' : 'var(--border-color)'}`,
-            fontSize: '0.85rem',
-            fontWeight: 700,
-            color: isFig ? 'rgba(139,92,246,1)' : isTable ? 'rgba(16,185,129,1)' : 'var(--text-muted)'
-          }}
-        >
-          <span>{isFig ? '🖼️' : isTable ? '📋' : '📌'}</span>
-          <span>{captionContent}</span>
-        </div>
-      );
+      // 중복 노출을 막기 위해 일반 텍스트 캡션 뱃지는 렌더링하지 않음
+      return null;
     }
 
     // 3. Legacy image/fig/table placeholder (e.g. transfer_table1, transfer_fig2)

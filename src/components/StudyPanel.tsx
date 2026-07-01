@@ -438,7 +438,10 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
         // 이 경우 전체 너비로 표시하고 캡션은 생략 (첫 번째 이미지에서만 노출)
         const isTableContinuation = /_table\d+_\d+(\.\w+)?$/.test(srcPart);
 
-        const isFullWidth = isOtherImage || isTableContinuation;
+        // 알고리즘 및 흐름도 이미지 감지 (너비를 넓게 확보해야 하는 특성 고려)
+        const isAlgorithm = altText.includes('알고리즘') || altText.includes('흐름도') || srcPart.toLowerCase().includes('algorithm') || srcPart.toLowerCase().includes('flowchart');
+
+        const isFullWidth = isOtherImage || isTableContinuation || isAlgorithm;
 
         return (
           <figure key={idx} style={{ 

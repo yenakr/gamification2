@@ -47,6 +47,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const [showXpModal, setShowXpModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'map' | 'report'>('map');
+  const [certSearchQuery, setCertSearchQuery] = useState('');
 
   const getCategoryCompletionPercent = (catId: string) => {
     const cat = quizData.find(c => c.id === catId);
@@ -354,111 +355,165 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
               </div>
 
-              {/* Certificate Re-issue Card */}
-              <div className="card-glow" style={{ padding: '24px', textAlign: 'left' }}>
-                <h3 style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: '16px' }}>📜 이수증 재발급</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '200px', overflowY: 'auto', paddingRight: '4px' }}>
-                  {(() => {
-                    const completedParts: { category: RobotCategory; part: any }[] = [];
-                    quizData.forEach(cat => {
-                      cat.parts.forEach(part => {
-                        if (badges[`${cat.id}-${part.id}`]) {
-                          completedParts.push({ category: cat, part });
-                        }
-                      });
-                    });
-
-                    if (completedParts.length === 0) {
-                      return <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>아직 완료된 평가 과정이 없습니다.</span>;
-                    }
-
-                    return completedParts.map(({ category, part }) => (
-                      <div key={`${category.id}-${part.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+              {/* Recent Activity Logs (Moved to Left Column) */}
+              <div className="card-glow" style={{ padding: '24px', textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
+                <h3 style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: '16px' }}>🕒 최근 학습 기록 (최신 10개)</h3>
+                
+                {activities && activities.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', maxHeight: '300px', paddingRight: '6px' }}>
+                    {activities.map((activity, idx) => (
+                      <div 
+                        key={idx} 
+                        style={{ 
+                          borderLeft: '3px solid var(--color-neon-pink)', 
+                          paddingLeft: '12px',
+                          paddingTop: '4px',
+                          paddingBottom: '4px',
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center' 
+                        }}
+                      >
                         <div>
-                          <strong style={{ fontSize: '0.85rem', display: 'block', color: 'var(--text-main)' }}>{category.name}</strong>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Part {part.id}. {part.title}</span>
+                          <strong style={{ fontSize: '0.9rem', display: 'block', color: 'var(--text-main)' }}>
+                            {activity.categoryName}
+                          </strong>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            Part {activity.partId}. {activity.partTitle}, {activity.quizType === 'pre' ? '사전 퀴즈' : '평가 퀴즈'}
+                          </span>
                         </div>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <button 
-                            className="secondary-btn" 
-                            style={{ padding: '4px 8px', fontSize: '0.7rem', borderRadius: '8px' }}
-                            onClick={() => {
-                              CertificateGenerator.downloadImage(
-                                profile?.name || '학습자',
-                                `${category.name} - ${part.title}`,
-                                100,
-                                0
-                              );
-                            }}
-                          >
-                            📥 이미지
-                          </button>
-                          <button 
-                            className="secondary-btn" 
-                            style={{ padding: '4px 8px', fontSize: '0.7rem', borderRadius: '8px' }}
-                            onClick={() => {
-                              CertificateGenerator.printPdf(
-                                profile?.name || '학습자',
-                                `${category.name} - ${part.title}`,
-                                100,
-                                0
-                              );
-                            }}
-                          >
-                            🖨️ PDF
-                          </button>
+                        <div style={{ textAlign: 'right' }}>
+                          <span style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, color: 'var(--color-neon-green)' }}>
+                            {activity.score}점
+                          </span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                            {new Date(activity.completedAt).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
-                    ));
-                  })()}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    아직 완료한 퀴즈 기록이 없습니다.<br />퀴즈를 풀고 이력을 쌓아보세요!
+                  </div>
+                )}
               </div>
 
             </div>
 
-            {/* Right Column: Recent Activity Logs */}
+            {/* Right Column: Certificate Re-issue Card (Moved to Right Column & Search Added) */}
             <div className="card-glow" style={{ padding: '24px', textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
-              <h3 style={{ fontWeight: 800, fontSize: '1.15rem', marginBottom: '16px' }}>🕒 최근 학습 기록 (최신 10개)</h3>
-              
-              {activities && activities.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', maxHeight: '450px', paddingRight: '6px' }}>
-                  {activities.map((activity, idx) => (
-                    <div 
-                      key={idx} 
-                      style={{ 
-                        borderLeft: '3px solid var(--color-neon-pink)', 
-                        paddingLeft: '12px',
-                        paddingTop: '4px',
-                        paddingBottom: '4px',
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center' 
-                      }}
-                    >
-                      <div>
-                        <strong style={{ fontSize: '0.9rem', display: 'block', color: 'var(--text-main)' }}>
-                          {activity.categoryName}
-                        </strong>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          Part {activity.partId}. {activity.partTitle}, {activity.quizType === 'pre' ? '사전 퀴즈' : '평가 퀴즈'}
-                        </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+                <h3 style={{ fontWeight: 800, fontSize: '1.15rem', margin: 0 }}>📜 이수증 재발급</h3>
+              </div>
+
+              {/* Certificate Search Bar */}
+              <div style={{ padding: '10px 14px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-primary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <span style={{ fontSize: '1rem' }}>🔍</span>
+                <input
+                  type="text"
+                  placeholder="로봇 명칭 또는 파트 제목으로 검색..."
+                  value={certSearchQuery}
+                  onChange={(e) => setCertSearchQuery(e.target.value)}
+                  style={{
+                    flex: 1,
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontSize: '0.85rem',
+                    color: 'var(--text-main)',
+                    fontFamily: 'var(--font-game)'
+                  }}
+                />
+                {certSearchQuery && (
+                  <button 
+                    onClick={() => setCertSearchQuery('')}
+                    style={{ 
+                      background: 'none', 
+                      color: 'var(--color-primary)', 
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      cursor: 'pointer' 
+                    }}
+                  >
+                    초기화
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto', maxHeight: '420px', paddingRight: '4px', flex: 1 }}>
+                {(() => {
+                  const completedParts: { category: RobotCategory; part: any }[] = [];
+                  quizData.forEach(cat => {
+                    cat.parts.forEach(part => {
+                      if (badges[`${cat.id}-${part.id}`]) {
+                        completedParts.push({ category: cat, part });
+                      }
+                    });
+                  });
+
+                  if (completedParts.length === 0) {
+                    return (
+                      <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)', fontSize: '0.9rem', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        아직 완료된 평가 과정이 없습니다.
                       </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, color: 'var(--color-neon-green)' }}>
-                          {activity.score}점
-                        </span>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                          {new Date(activity.completedAt).toLocaleDateString()}
-                        </span>
+                    );
+                  }
+
+                  const filteredParts = completedParts.filter(({ category, part }) => {
+                    const query = certSearchQuery.toLowerCase().trim();
+                    return category.name.toLowerCase().includes(query) || part.title.toLowerCase().includes(query);
+                  });
+
+                  if (filteredParts.length === 0) {
+                    return (
+                      <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)', fontSize: '0.9rem', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        검색 조건에 맞는 이수증이 없습니다.
+                      </div>
+                    );
+                  }
+
+                  return filteredParts.map(({ category, part }) => (
+                    <div key={`${category.id}-${part.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+                      <div>
+                        <strong style={{ fontSize: '0.85rem', display: 'block', color: 'var(--text-main)' }}>{category.name}</strong>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Part {part.id}. {part.title}</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button 
+                          className="secondary-btn" 
+                          style={{ padding: '4px 8px', fontSize: '0.7rem', borderRadius: '8px' }}
+                          onClick={() => {
+                            CertificateGenerator.downloadImage(
+                              profile?.name || '학습자',
+                              `${category.name} - ${part.title}`,
+                              100,
+                              0
+                            );
+                          }}
+                        >
+                          📥 이미지
+                        </button>
+                        <button 
+                          className="secondary-btn" 
+                          style={{ padding: '4px 8px', fontSize: '0.7rem', borderRadius: '8px' }}
+                          onClick={() => {
+                            CertificateGenerator.printPdf(
+                              profile?.name || '학습자',
+                              `${category.name} - ${part.title}`,
+                              100,
+                              0
+                            );
+                          }}
+                        >
+                          🖨️ PDF
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)', fontSize: '0.9rem', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  아직 완료한 퀴즈 기록이 없습니다.<br />퀴즈를 풀고 이력을 쌓아보세요!
-                </div>
-              )}
+                  ));
+                })()}
+              </div>
             </div>
 
           </div>

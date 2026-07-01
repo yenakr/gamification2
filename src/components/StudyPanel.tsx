@@ -174,6 +174,8 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
         }
         currentParagraphs.push('__TABLE_BLOCK__' + tableBlock.trim());
         continue; // i++는 위 루프에서 이미 수행됨
+      } else if (line.startsWith('[출처]') || line.startsWith('[출처:')) {
+        currentParagraphs.push('__SOURCE_BLOCK__' + line.trim());
       } else if (line.startsWith('> ')) {
         // Blockquote: could be caption like "> [그림 1] 설명" or image "![alt](src)"
         currentParagraphs.push(line); // keep with '> ' prefix for rendering
@@ -230,6 +232,54 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
   };
 
   const renderParagraph = (text: string, idx: number) => {
+    // 000. Source Block rendering
+    if (text.startsWith('__SOURCE_BLOCK__')) {
+      const rawSource = text.slice(16).trim();
+      const match = rawSource.match(/^\[출처(?::\s*([^\]]+))?\](?:\(([^)]+)\))?/);
+      
+      let sourceText = rawSource;
+      let sourceLink = '';
+      
+      if (match) {
+        sourceText = match[1] ? `출처: ${match[1]}` : '출처';
+        sourceLink = match[2] || '';
+      } else {
+        const linkMatch = rawSource.match(/\((https?:\/\/[^\)]+)\)/);
+        if (linkMatch) {
+          sourceLink = linkMatch[1];
+          sourceText = rawSource.replace(/\(https?:\/\/[^\)]+\)/, '').trim();
+        }
+      }
+
+      if (sourceText.startsWith('[출처]')) {
+        sourceText = sourceText.replace(/^\[출처\]\s*/, '출처: ');
+      }
+
+      return (
+        <div key={idx} className="study-source-info" style={{ 
+          fontSize: '0.85rem', 
+          color: 'var(--text-muted)', 
+          marginTop: '16px', 
+          marginBottom: '8px', 
+          textAlign: 'right',
+          fontStyle: 'italic'
+        }}>
+          {sourceLink ? (
+            <a 
+              href={sourceLink} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              style={{ color: 'var(--color-neon-cyan)', textDecoration: 'underline', fontWeight: 600 }}
+            >
+              {sourceText} 🔗
+            </a>
+          ) : (
+            <span>{sourceText}</span>
+          )}
+        </div>
+      );
+    }
+
     // 00. Table Block rendering
     if (text.startsWith('__TABLE_BLOCK__')) {
       const tableRaw = text.slice(15);
@@ -500,12 +550,8 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                 gap: '12px'
               }}
             >
-              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--color-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-                🧭 교재 빠른 이동
-              </div>
-
-              {/* 5대 로봇 카테고리 탭 (단어명이 포함된 가로 탭) */}
-              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
+              {/* 5대 로봇 카테고리 탭 (스크롤 없이 균등하게 가로폭 전체 차지) */}
+              <div style={{ display: 'flex', gap: '4px', width: '100%', paddingBottom: '4px' }}>
                 {quizData.map((cat) => {
                   const isActive = cat.id === tempCategoryId;
                   return (
@@ -514,18 +560,20 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                       title={cat.name}
                       onClick={() => {
                         sfx.playClick();
-                        setTempCategoryId(cat.id); // 탭 클릭 시 화면 이동하지 않고 임시 카테고리 상태만 변경
+                        setTempCategoryId(cat.id);
                       }}
                       style={{
-                        flexShrink: 0,
+                        flex: 1,
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
-                        gap: '4px',
-                        padding: '6px 10px',
+                        justifyContent: 'center',
+                        gap: '2px',
+                        padding: '6px 2px',
                         borderRadius: '10px',
                         border: isActive ? '1.5px solid var(--color-primary)' : '1px solid var(--border-color)',
                         background: isActive ? 'rgba(124, 58, 237, 0.08)' : 'var(--bg-primary)',
-                        fontSize: '0.85rem',
+                        fontSize: '0.78rem',
                         fontWeight: isActive ? 800 : 600,
                         color: isActive ? 'var(--color-primary)' : 'var(--text-main)',
                         cursor: 'pointer',
@@ -533,7 +581,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                         fontFamily: 'var(--font-game)'
                       }}
                     >
-                      <span>{cat.icon}</span>
+                      <span style={{ fontSize: '1rem' }}>{cat.icon}</span>
                       <span>{categoryWordMapping[cat.id] || cat.name.slice(0, 2)}</span>
                     </button>
                   );

@@ -102,9 +102,10 @@ export class CertificateGenerator {
     quizTitle: string,
     score: number,
     maxCombo: number,
-    isMaster: boolean = false
+    isMaster: boolean = false,
+    completedAtStr?: string
   ) {
-    const dateStr = new Date().toLocaleString('ko-KR');
+    const dateStr = completedAtStr || new Date().toLocaleString('ko-KR');
     const canvas = this.generateCanvas(userName, quizTitle, score, maxCombo, dateStr, isMaster);
     const dataUrl = canvas.toDataURL('image/png');
 
@@ -119,9 +120,10 @@ export class CertificateGenerator {
     quizTitle: string,
     score: number,
     maxCombo: number,
-    isMaster: boolean = false
+    isMaster: boolean = false,
+    completedAtStr?: string
   ) {
-    const dateStr = new Date().toLocaleString('ko-KR');
+    const dateStr = completedAtStr || new Date().toLocaleString('ko-KR');
     const canvas = this.generateCanvas(userName, quizTitle, score, maxCombo, dateStr, isMaster);
     const dataUrl = canvas.toDataURL('image/png');
 

@@ -22,7 +22,7 @@ interface DashboardProps {
   level: number;
   xp: number;
   xpToNextLevel: number;
-  badges: Record<string, boolean>; // key format: "category-part" (e.g. "excretion-1")
+  badges: Record<string, string | boolean>; // key format: "category-part" (e.g. "excretion-1")
   onSelectCategory: (category: RobotCategory) => void;
   isMuted: boolean;
   onToggleMute: () => void;
@@ -72,6 +72,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
       }
     });
     return count;
+  };
+
+  const getCategoryMasterCompletionDateStr = (catId: string) => {
+    const cat = quizData.find(c => c.id === catId);
+    if (!cat) return undefined;
+    let latestDate: Date | null = null;
+    for (const part of cat.parts) {
+      const val = badges[`${catId}-${part.id}`];
+      if (typeof val === 'string') {
+        const d = new Date(val);
+        if (!latestDate || d > latestDate) {
+          latestDate = d;
+        }
+      }
+    }
+    return latestDate ? latestDate.toLocaleString('ko-KR') : undefined;
   };
 
   const getRankName = (lvl: number) => {
@@ -446,7 +462,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                                   `${category.name} 종합 마스터 과정`,
                                   100,
                                   0,
-                                  true
+                                  true,
+                                  getCategoryMasterCompletionDateStr(category.id)
                                 );
                               }}
                             >
@@ -467,7 +484,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                                   `${category.name} 종합 마스터 과정`,
                                   100,
                                   0,
-                                  true
+                                  true,
+                                  getCategoryMasterCompletionDateStr(category.id)
                                 );
                               }}
                             >
@@ -598,44 +616,55 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       );
                     }
 
-                    return filteredParts.map(({ category, part }) => (
-                      <div key={`${category.id}-${part.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-                        <div>
-                          <strong style={{ fontSize: '0.85rem', display: 'block', color: 'var(--text-main)' }}>{category.name}</strong>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Part {part.id}. {part.title}</span>
+                    return filteredParts.map(({ category, part }) => {
+                      const badgeVal = badges[`${category.id}-${part.id}`];
+                      const completedAtStr = typeof badgeVal === 'string'
+                        ? new Date(badgeVal).toLocaleString('ko-KR')
+                        : undefined;
+
+                      return (
+                        <div key={`${category.id}-${part.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+                          <div>
+                            <strong style={{ fontSize: '0.85rem', display: 'block', color: 'var(--text-main)' }}>{category.name}</strong>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Part {part.id}. {part.title}</span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button 
+                              className="secondary-btn" 
+                              style={{ padding: '4px 8px', fontSize: '0.7rem', borderRadius: '8px' }}
+                              onClick={() => {
+                                CertificateGenerator.downloadImage(
+                                  profile?.name || '학습자',
+                                  `${category.name} - ${part.title}`,
+                                  100,
+                                  0,
+                                  false,
+                                  completedAtStr
+                                );
+                              }}
+                            >
+                              📥 이미지
+                            </button>
+                            <button 
+                              className="secondary-btn" 
+                              style={{ padding: '4px 8px', fontSize: '0.7rem', borderRadius: '8px' }}
+                              onClick={() => {
+                                CertificateGenerator.printPdf(
+                                  profile?.name || '학습자',
+                                  `${category.name} - ${part.title}`,
+                                  100,
+                                  0,
+                                  false,
+                                  completedAtStr
+                                );
+                              }}
+                            >
+                              🖨️ PDF
+                            </button>
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <button 
-                            className="secondary-btn" 
-                            style={{ padding: '4px 8px', fontSize: '0.7rem', borderRadius: '8px' }}
-                            onClick={() => {
-                              CertificateGenerator.downloadImage(
-                                profile?.name || '학습자',
-                                `${category.name} - ${part.title}`,
-                                100,
-                                0
-                              );
-                            }}
-                          >
-                            📥 이미지
-                          </button>
-                          <button 
-                            className="secondary-btn" 
-                            style={{ padding: '4px 8px', fontSize: '0.7rem', borderRadius: '8px' }}
-                            onClick={() => {
-                              CertificateGenerator.printPdf(
-                                profile?.name || '학습자',
-                                `${category.name} - ${part.title}`,
-                                100,
-                                0
-                              );
-                            }}
-                          >
-                            🖨️ PDF
-                          </button>
-                        </div>
-                      </div>
-                    ));
+                      );
+                    });
                   })()}
                 </div>
               </div>

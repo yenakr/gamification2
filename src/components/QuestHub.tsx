@@ -4,7 +4,7 @@ import { sfx } from '../utils/soundEffects';
 
 interface QuestHubProps {
   category: RobotCategory;
-  badges: Record<string, boolean>; // format: "category-part" (post-quiz completes part)
+  badges: Record<string, string | boolean>; // format: "category-part" (post-quiz completes part)
   preQuizCompleted: Record<string, boolean>; // format: "category-part"
   onBack: () => void;
   onSelectPart: (part: PartData, mode: 'pre' | 'study' | 'post') => void;

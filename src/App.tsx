@@ -38,7 +38,7 @@ function App() {
   const [level, setLevel] = useState(1);
   const [xp, setXp] = useState(0);
   const [xpToNextLevel, setXpToNextLevel] = useState(100);
-  const [badges, setBadges] = useState<Record<string, boolean>>({});
+   const [badges, setBadges] = useState<Record<string, string | boolean>>({});
   const [preQuizCompleted, setPreQuizCompleted] = useState<Record<string, boolean>>({});
   const [isMuted, setIsMuted] = useState(false);
 
@@ -151,7 +151,7 @@ function App() {
     currentLvl: number,
     currentXp: number,
     currentXpMax: number,
-    currentBadges: Record<string, boolean>,
+    currentBadges: Record<string, string | boolean>,
     currentPreQuiz: Record<string, boolean>
   ) => {
     if (!token || !user || user.role !== 'user') return;
@@ -224,7 +224,7 @@ function App() {
     }
   };
 
-  const addXp = (amount: number, updatedBadges?: Record<string, boolean>, updatedPreQuiz?: Record<string, boolean>) => {
+  const addXp = (amount: number, updatedBadges?: Record<string, string | boolean>, updatedPreQuiz?: Record<string, boolean>) => {
     let nextXp = xp + amount;
     let nextLevel = level;
     let nextXpNeeded = xpToNextLevel;
@@ -269,7 +269,7 @@ function App() {
       nextPreQuiz[partKey] = true;
       setPreQuizCompleted(nextPreQuiz);
     } else {
-      nextBadges[partKey] = true;
+      nextBadges[partKey] = new Date().toISOString();
       setBadges(nextBadges);
     }
 

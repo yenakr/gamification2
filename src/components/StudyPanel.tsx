@@ -717,8 +717,31 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
           <button className="primary-btn" onClick={loadMarkdownContent} style={{ marginTop: '20px' }}>다시 시도</button>
         </div>
       ) : (
-        <div className="study-book-frame card-glow" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden' }}>
-          {/* Progress bar */}
+        <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {/* Left Navigation Arrow */}
+          {currentPageIndex > 0 && (
+            <button 
+              className="nav-arrow-btn left" 
+              onClick={handlePrevPage}
+              title="이전 페이지"
+            >
+              〈
+            </button>
+          )}
+
+          {/* Right Navigation Arrow */}
+          {currentPageIndex < pages.length - 1 && (
+            <button 
+              className="nav-arrow-btn right" 
+              onClick={handleNextPage}
+              title="다음 페이지"
+            >
+              〉
+            </button>
+          )}
+
+          <div className="study-book-frame card-glow" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden' }}>
+            {/* Progress bar */}
           <div className="progress-bar-container" style={{ height: '6px', borderRadius: '0' }}>
             <div className="progress-bar-fill" style={{ width: `${((currentPageIndex + 1) / pages.length) * 100}%` }}></div>
           </div>
@@ -858,6 +881,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
               </button>
             )}
           </footer>
+        </div>
         </div>
       )}
     </div>

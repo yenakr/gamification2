@@ -1341,4 +1341,68 @@ button {
   color: var(--text-muted);
 }
 
+/* StudyPanel navigation arrow buttons */
+.nav-arrow-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), #6366f1);
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  user-select: none;
+}
+
+.nav-arrow-btn:hover {
+  transform: translateY(-50%) scale(1.12);
+  background: linear-gradient(135deg, #6366f1, var(--color-neon-cyan));
+  box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.nav-arrow-btn:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+.nav-arrow-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.nav-arrow-btn.left {
+  left: -78px;
+}
+
+.nav-arrow-btn.right {
+  right: -78px;
+}
+
+/* On smaller screens, place them inside the frame to prevent them from going off screen */
+@media (max-width: 1200px) {
+  .nav-arrow-btn.left {
+    left: 12px;
+    background: rgba(124, 58, 237, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .nav-arrow-btn.right {
+    right: 12px;
+    background: rgba(124, 58, 237, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}
+
 

@@ -281,12 +281,37 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       }
       sourceText = sourceText.replace(/,\s*$/, '').trim();
 
+      // 이전 문단 타입을 검사하여 겹침 방지 동적 마진 결정
+      const pageParagraphs = pages[currentPageIndex]?.paragraphs || [];
+      const prevParagraph = idx > 0 ? pageParagraphs[idx - 1] : null;
+      
+      let marginTopVal = '-24px';
+      let marginBottomVal = '24px';
+      
+      if (prevParagraph) {
+        const prevTrimmed = prevParagraph.trim();
+        if (
+          (prevTrimmed.startsWith('**') && prevTrimmed.endsWith('**')) ||
+          prevTrimmed.startsWith('-') ||
+          prevTrimmed.startsWith('*') ||
+          prevTrimmed.startsWith('__TABLE_BLOCK__') ||
+          prevTrimmed.startsWith('![') ||
+          prevTrimmed.startsWith('>')
+        ) {
+          marginTopVal = '6px';
+          marginBottomVal = '16px';
+        }
+      } else {
+        marginTopVal = '6px';
+        marginBottomVal = '16px';
+      }
+
       return (
         <div key={idx} className="study-source-info" style={{ 
           fontSize: '0.75rem', 
           color: 'var(--text-muted)', 
-          marginTop: '-24px', 
-          marginBottom: '24px', 
+          marginTop: marginTopVal, 
+          marginBottom: marginBottomVal, 
           textAlign: 'right',
           wordBreak: 'break-all',
           lineHeight: '1.4'

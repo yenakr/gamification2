@@ -296,9 +296,9 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
               href={sourceLink} 
               target="_blank" 
               rel="noopener noreferrer" 
-              style={{ color: 'inherit', textDecoration: 'underline' }}
+              style={{ color: 'inherit', textDecoration: 'none' }}
             >
-              {sourceText} 🔗
+              {sourceText}
             </a>
           ) : (
             <span>{sourceText}</span>

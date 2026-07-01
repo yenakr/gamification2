@@ -271,9 +271,9 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       }
       
       if (sourceText.startsWith('[출처]')) {
-        sourceText = sourceText.replace(/^\[출처\]\s*/, '출처: ');
+        sourceText = sourceText.replace(/^\[출처\]\s*/, '');
       } else if (sourceText.startsWith('[출처:')) {
-        sourceText = sourceText.replace(/^\[출처:\s*([^\]]+)\]\s*/, '출처: $1 ');
+        sourceText = sourceText.replace(/^\[출처:\s*([^\]]+)\]\s*/, '$1 ');
       }
       
       if (sourceText.endsWith('from')) {
@@ -283,20 +283,20 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
 
       return (
         <div key={idx} className="study-source-info" style={{ 
-          fontSize: '0.85rem', 
+          fontSize: '0.75rem', 
           color: 'var(--text-muted)', 
-          marginTop: '16px', 
-          marginBottom: '8px', 
+          marginTop: '4px', 
+          marginBottom: '4px', 
           textAlign: 'right',
-          fontStyle: 'italic',
-          wordBreak: 'break-all'
+          wordBreak: 'break-all',
+          lineHeight: '1.4'
         }}>
           {sourceLink ? (
             <a 
               href={sourceLink} 
               target="_blank" 
               rel="noopener noreferrer" 
-              style={{ color: 'var(--color-neon-cyan)', textDecoration: 'underline', fontWeight: 600 }}
+              style={{ color: 'inherit', textDecoration: 'underline' }}
             >
               {sourceText} 🔗
             </a>

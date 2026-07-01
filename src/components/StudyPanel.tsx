@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { PartData } from '../data/quizData';
+import { quizData, type PartData } from '../data/quizData';
 import { sfx } from '../utils/soundEffects';
 
 interface StudyPanelProps {
@@ -32,6 +32,8 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
   onBack,
   onStartPostQuiz
 }) => {
+  const [currentCategoryId, setCurrentCategoryId] = useState(categoryId);
+  const [currentPart, setCurrentPart] = useState<PartData>(part);
   const [pages, setPages] = useState<PageData[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -39,7 +41,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
 
   useEffect(() => {
     loadMarkdownContent();
-  }, [part.id, categoryId]);
+  }, [currentPart.id, currentCategoryId]);
 
   const loadMarkdownContent = async () => {
     try {
@@ -47,9 +49,12 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       setError('');
       setCurrentPageIndex(0);
 
-      const fileName = categoryFileMapping[categoryId];
+      const fileName = categoryFileMapping[currentCategoryId];
+      const categoryObj = quizData.find(c => c.id === currentCategoryId);
+      const categoryNameStr = categoryObj ? categoryObj.name : categoryName;
+      
       if (!fileName) {
-        throw new Error(`'${categoryName}' 카테고리의 학습용 MD 파일 매핑이 없습니다.`);
+        throw new Error(`'${categoryNameStr}' 카테고리의 학습용 MD 파일 매핑이 없습니다.`);
       }
       
       const response = await fetch(`/material/${fileName}`);
@@ -58,7 +63,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       }
 
       const text = await response.text();
-      const parsedPages = parsePartFromMarkdown(text, part.id);
+      const parsedPages = parsePartFromMarkdown(text, currentPart.id);
       
       if (parsedPages.length === 0) {
         throw new Error('이 파트의 학습 콘텐츠를 파싱하는 데 실패했습니다.');
@@ -69,8 +74,8 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       console.error(err);
       setError(err.message || '콘텐츠 로딩 오류');
       // Fallback to static slides if md loading fails
-      setPages(part.studySlides.map((slide, idx) => ({
-        title: `${part.title} - 슬라이드 ${idx + 1}`,
+      setPages(currentPart.studySlides.map((slide, idx) => ({
+        title: `${currentPart.title} - 슬라이드 ${idx + 1}`,
         paragraphs: slide.split('\n'),
         level: 5
       })));
@@ -417,21 +422,94 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
 
   return (
     <div className="study-panel-container" style={{ width: '95vw', maxWidth: '1000px', margin: '0 auto', minHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
-      <header className="study-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-        <button 
-          className="exit-btn" 
-          onClick={() => {
-            sfx.playClick();
-            onBack();
-          }}
-          style={{ padding: '8px 16px', borderRadius: '15px' }}
-        >
-          ← 목록으로
-        </button>
-        <span className="study-badge" style={{ fontSize: '0.9rem', fontWeight: 700 }}>
-          📖 {categoryName} - Part {part.id}. {part.title}
-        </span>
-      </header>
+      {/* 5대 돌봄로봇 카테고리 및 파트 내비게이터 바 */}
+      <div className="card-glow" style={{ padding: '14px 20px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+          <button 
+            className="exit-btn" 
+            onClick={() => {
+              sfx.playClick();
+              onBack();
+            }}
+            style={{ padding: '6px 14px', borderRadius: '12px', fontSize: '0.9rem', cursor: 'pointer' }}
+          >
+            ← 목록으로
+          </button>
+          <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--color-primary)' }}>
+            📚 돌봄로봇 교육 교재 통합 내비게이터
+          </span>
+        </div>
+
+        {/* 5대 로봇 카테고리 가로 선택 탭 */}
+        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+          {quizData.map((cat) => {
+            const isActive = cat.id === currentCategoryId;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  sfx.playClick();
+                  setCurrentCategoryId(cat.id);
+                  // 새로운 카테고리로 변경될 때, 해당 카테고리의 Part 1을 기본값으로 지정
+                  if (cat.parts && cat.parts.length > 0) {
+                    setCurrentPart(cat.parts[0]);
+                  }
+                }}
+                style={{
+                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '10px 18px',
+                  borderRadius: '12px',
+                  border: isActive ? '2px solid var(--color-primary)' : '1px solid var(--border-color)',
+                  background: isActive ? 'rgba(124, 58, 237, 0.08)' : 'var(--bg-secondary)',
+                  color: isActive ? 'var(--color-primary)' : 'var(--text-main)',
+                  fontWeight: isActive ? 800 : 600,
+                  fontSize: '0.95rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  fontFamily: 'var(--font-game)'
+                }}
+              >
+                <span>{cat.icon}</span>
+                <span>{cat.name}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 선택한 카테고리의 챕터(Part) 가로 칩 리스트 바 */}
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingTop: '8px', borderTop: '1px dashed var(--border-color)' }}>
+          {quizData.find(c => c.id === currentCategoryId)?.parts.map((p) => {
+            const isPartActive = p.id === currentPart.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => {
+                  sfx.playClick();
+                  setCurrentPart(p);
+                }}
+                style={{
+                  flexShrink: 0,
+                  padding: '8px 14px',
+                  borderRadius: '20px',
+                  border: isPartActive ? '1.5px solid var(--color-neon-cyan)' : '1px solid var(--border-color)',
+                  background: isPartActive ? 'rgba(14, 165, 233, 0.08)' : 'var(--bg-secondary)',
+                  color: isPartActive ? 'var(--color-neon-cyan)' : 'var(--text-muted)',
+                  fontWeight: isPartActive ? 800 : 500,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  fontFamily: 'var(--font-game)'
+                }}
+              >
+                Part {p.id}. {p.title}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {loading ? (
         <div className="card-glow text-center" style={{ flex: 1, padding: '100px 20px', fontSize: '1.1rem', color: 'var(--text-muted)' }}>

@@ -176,12 +176,23 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
         continue; // i++는 위 루프에서 이미 수행됨
       } else if (line.startsWith('[출처]') || line.startsWith('[출처:')) {
         let sourceBlock = line.replace(/\r$/, '').trim();
-        if (i + 1 < lines.length) {
+        while (i + 1 < lines.length) {
           const nextLineTrimmed = lines[i + 1].replace(/\r$/, '').trim();
-          if (nextLineTrimmed.startsWith('http://') || nextLineTrimmed.startsWith('https://')) {
-            sourceBlock += ` (${nextLineTrimmed})`;
-            i++;
+          if (
+            nextLineTrimmed === '' ||
+            nextLineTrimmed.startsWith('[출처]') ||
+            nextLineTrimmed.startsWith('[출처:') ||
+            nextLineTrimmed.startsWith('#') ||
+            nextLineTrimmed.startsWith('- ') ||
+            nextLineTrimmed.startsWith('* ') ||
+            nextLineTrimmed.startsWith('|') ||
+            nextLineTrimmed.startsWith('!') ||
+            nextLineTrimmed.startsWith('>')
+          ) {
+            break;
           }
+          sourceBlock += ' ' + nextLineTrimmed;
+          i++;
         }
         currentParagraphs.push('__SOURCE_BLOCK__' + sourceBlock);
       } else if (line.startsWith('> ')) {
@@ -243,25 +254,32 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     // 000. Source Block rendering
     if (text.startsWith('__SOURCE_BLOCK__')) {
       const rawSource = text.slice(16).trim();
-      const match = rawSource.match(/^\[출처(?::\s*([^\]]+))?\](?:\(([^)]+)\))?/);
       
       let sourceText = rawSource;
       let sourceLink = '';
       
-      if (match) {
-        sourceText = match[1] ? `출처: ${match[1]}` : '출처';
-        sourceLink = match[2] || '';
-      } else {
-        const linkMatch = rawSource.match(/\((https?:\/\/[^\)]+)\)/);
-        if (linkMatch) {
-          sourceLink = linkMatch[1];
-          sourceText = rawSource.replace(/\(https?:\/\/[^\)]+\)/, '').trim();
+      const urlRegex = /(https?:\/\/[^\s\)]+|doi\.org\/[^\s\)]+)/i;
+      const urlMatch = rawSource.match(urlRegex);
+      
+      if (urlMatch) {
+        sourceLink = urlMatch[1];
+        if (sourceLink.toLowerCase().startsWith('doi.org')) {
+          sourceLink = 'https://' + sourceLink;
         }
+        sourceText = rawSource.replace(urlRegex, '').trim();
+        sourceText = sourceText.replace(/\(\s*\)/g, '').replace(/\[\s*\]/g, '').trim();
       }
-
+      
       if (sourceText.startsWith('[출처]')) {
         sourceText = sourceText.replace(/^\[출처\]\s*/, '출처: ');
+      } else if (sourceText.startsWith('[출처:')) {
+        sourceText = sourceText.replace(/^\[출처:\s*([^\]]+)\]\s*/, '출처: $1 ');
       }
+      
+      if (sourceText.endsWith('from')) {
+        sourceText = sourceText.slice(0, -4).trim();
+      }
+      sourceText = sourceText.replace(/,\s*$/, '').trim();
 
       return (
         <div key={idx} className="study-source-info" style={{ 
@@ -270,7 +288,8 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
           marginTop: '16px', 
           marginBottom: '8px', 
           textAlign: 'right',
-          fontStyle: 'italic'
+          fontStyle: 'italic',
+          wordBreak: 'break-all'
         }}>
           {sourceLink ? (
             <a 

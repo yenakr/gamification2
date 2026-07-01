@@ -175,7 +175,15 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
         currentParagraphs.push('__TABLE_BLOCK__' + tableBlock.trim());
         continue; // i++는 위 루프에서 이미 수행됨
       } else if (line.startsWith('[출처]') || line.startsWith('[출처:')) {
-        currentParagraphs.push('__SOURCE_BLOCK__' + line.trim());
+        let sourceBlock = line.replace(/\r$/, '').trim();
+        if (i + 1 < lines.length) {
+          const nextLineTrimmed = lines[i + 1].replace(/\r$/, '').trim();
+          if (nextLineTrimmed.startsWith('http://') || nextLineTrimmed.startsWith('https://')) {
+            sourceBlock += ` (${nextLineTrimmed})`;
+            i++;
+          }
+        }
+        currentParagraphs.push('__SOURCE_BLOCK__' + sourceBlock);
       } else if (line.startsWith('> ')) {
         // Blockquote: could be caption like "> [그림 1] 설명" or image "![alt](src)"
         currentParagraphs.push(line); // keep with '> ' prefix for rendering

@@ -541,8 +541,15 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       );
     }
 
+    const currentTrimmed = text.trim();
+    const isTitleLike = /:\s*$/i.test(currentTrimmed) || /:\*\*\s*$/i.test(currentTrimmed);
+    const pageParagraphs = pages[currentPageIndex]?.paragraphs || [];
+    const nextParagraph = idx + 1 < pageParagraphs.length ? pageParagraphs[idx + 1] : null;
+    const isNextList = nextParagraph ? (nextParagraph.trim().startsWith('- ') || nextParagraph.trim().startsWith('* ')) : false;
+    const marginBtm = isTitleLike && isNextList ? '8px' : '32px';
+
     return (
-      <p key={idx} className="study-text-para" style={{ marginBottom: '32px', lineHeight: '1.7', fontSize: '1.35rem', textAlign: 'justify' }}>
+      <p key={idx} className="study-text-para" style={{ marginBottom: marginBtm, lineHeight: '1.7', fontSize: '1.35rem', textAlign: 'justify' }}>
         {parseBoldText(text)}
       </p>
     );

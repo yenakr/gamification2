@@ -1343,7 +1343,7 @@ button {
 
 /* StudyPanel navigation arrow buttons */
 .nav-arrow-btn {
-  position: absolute;
+  position: fixed;
   top: 50%;
   transform: translateY(-50%);
   width: 56px;
@@ -1351,14 +1351,12 @@ button {
   border-radius: 50%;
   background: linear-gradient(135deg, var(--color-primary), #6366f1);
   color: #ffffff;
-  font-size: 1.5rem;
-  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
   cursor: pointer;
-  z-index: 10;
+  z-index: 100; /* Higher z-index to stay on top of content and sidebar */
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   border: 2px solid rgba(255, 255, 255, 0.3);
   user-select: none;
@@ -1382,23 +1380,23 @@ button {
 }
 
 .nav-arrow-btn.left {
-  left: -78px;
+  left: calc(50vw - 580px);
 }
 
 .nav-arrow-btn.right {
-  right: -78px;
+  right: calc(50vw - 580px);
 }
 
-/* On smaller screens, place them inside the frame to prevent them from going off screen */
+/* On smaller screens, place them inside the viewport margin to prevent them from going off screen */
 @media (max-width: 1200px) {
   .nav-arrow-btn.left {
-    left: 12px;
+    left: 20px;
     background: rgba(124, 58, 237, 0.85);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
   }
   .nav-arrow-btn.right {
-    right: 12px;
+    right: 20px;
     background: rgba(124, 58, 237, 0.85);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);

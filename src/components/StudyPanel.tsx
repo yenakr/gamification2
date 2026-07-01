@@ -725,7 +725,9 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
               onClick={handlePrevPage}
               title="이전 페이지"
             >
-              〈
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
             </button>
           )}
 
@@ -736,7 +738,9 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
               onClick={handleNextPage}
               title="다음 페이지"
             >
-              〉
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
             </button>
           )}
 

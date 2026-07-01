@@ -36,6 +36,7 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedUserId, setExpandedUserId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchUsersProgress();
@@ -96,6 +97,14 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
     return acc + badgeCount;
   }, 0);
 
+  // Filter users by name or username
+  const filteredUsers = users.filter(user => {
+    const name = user.name || '';
+    const username = user.username || '';
+    const query = searchQuery.toLowerCase().trim();
+    return name.toLowerCase().includes(query) || username.toLowerCase().includes(query);
+  });
+
   return (
     <div style={{ padding: '20px 0' }} className="slide-up-anim">
       <div className="admin-header">
@@ -129,6 +138,42 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
         </div>
       </div>
 
+      {/* Search Input Box */}
+      {!loading && !error && users.length > 0 && (
+        <div className="card-glow" style={{ padding: '14px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+          <span style={{ fontSize: '1.2rem' }}>🔍</span>
+          <input
+            type="text"
+            placeholder="회원 이름 또는 아이디로 검색..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              flex: 1,
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+              fontSize: '1rem',
+              color: 'var(--text-main)',
+              fontFamily: 'var(--font-game)'
+            }}
+          />
+          {searchQuery && (
+            <button 
+              onClick={() => setSearchQuery('')}
+              style={{ 
+                background: 'none', 
+                color: 'var(--color-primary)', 
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer' 
+              }}
+            >
+              초기화
+            </button>
+          )}
+        </div>
+      )}
+
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
           데이터 로딩 중...
@@ -141,9 +186,18 @@ export function AdminDashboard({ token, onLogout }: AdminDashboardProps) {
         <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }} className="card-glow">
           가입된 일반 사용자가 아직 없습니다.
         </div>
+      ) : filteredUsers.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }} className="card-glow">
+          검색어와 일치하는 학습자가 없습니다.
+        </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {users.map((user) => {
+          {searchQuery && (
+            <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', paddingLeft: '4px' }}>
+              검색 결과: <strong>{filteredUsers.length}</strong>명 / 총 {totalUsers}명
+            </div>
+          )}
+          {filteredUsers.map((user) => {
             const userLvl = user.level || 1;
             const userXp = user.xp || 0;
             const xpMax = user.xpToNextLevel || 100;

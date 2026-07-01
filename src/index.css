@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
 
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   --bg-primary: #f8f9fd;
   --bg-secondary: #ffffff;
@@ -1276,6 +1280,15 @@ button {
   border-radius: 24px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08), inset 0 0 40px rgba(0, 0, 0, 0.02);
   position: relative;
+  /* Prevent shifting and layout transition animations */
+  transform: none !important;
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed) !important;
+}
+
+.study-book-frame:hover {
+  transform: none !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08), inset 0 0 40px rgba(0, 0, 0, 0.02) !important;
+  border-color: var(--text-main) !important;
 }
 
 /* Decorative book center line/spine divider when screen size is large */
@@ -1298,6 +1311,7 @@ button {
     linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
   background-size: 100% 3.2rem;
   line-height: 3.2rem;
+  scrollbar-gutter: stable;
 }
 
 .study-image-placeholder {

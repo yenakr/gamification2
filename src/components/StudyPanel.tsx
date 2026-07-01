@@ -434,22 +434,28 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
         // 기타(_other) 설명서 이미지 여부 감지
         const isOtherImage = srcPart.includes('_other') || altText.startsWith('기타') || altText.startsWith('[기타');
 
+        // 표가 두 페이지로 나뉜 연속 이미지 감지: _tableN_M 패턴 (예: table1_1, table2_1)
+        // 이 경우 전체 너비로 표시하고 캡션은 생략 (첫 번째 이미지에서만 노출)
+        const isTableContinuation = /_table\d+_\d+(\.\w+)?$/.test(srcPart);
+
+        const isFullWidth = isOtherImage || isTableContinuation;
+
         return (
           <figure key={idx} style={{ 
-            margin: isOtherImage ? '18px 0' : '24px auto', 
+            margin: isFullWidth ? '18px 0' : '24px auto', 
             textAlign: 'center', 
-            maxWidth: isOtherImage ? '100%' : '75%' 
+            maxWidth: isFullWidth ? '100%' : '75%' 
           }}>
             <img
               src={srcPart}
               alt={altText}
               style={{
                 maxWidth: '100%',
-                width: isOtherImage ? '100%' : 'auto',
-                maxHeight: isOtherImage ? 'none' : '360px',
+                width: isFullWidth ? '100%' : 'auto',
+                maxHeight: isFullWidth ? 'none' : '360px',
                 objectFit: 'contain',
-                borderRadius: isOtherImage ? '8px' : '12px',
-                boxShadow: isOtherImage ? '0 2px 12px rgba(0,0,0,0.06)' : '0 4px 20px rgba(0,0,0,0.12)',
+                borderRadius: isFullWidth ? '8px' : '12px',
+                boxShadow: isFullWidth ? '0 2px 12px rgba(0,0,0,0.06)' : '0 4px 20px rgba(0,0,0,0.12)',
                 border: '1px solid var(--border-color)',
                 display: 'block',
                 margin: '0 auto'
@@ -481,8 +487,8 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                 설정 경로: {srcPart}
               </span>
             </div>
-            {/* 기타 설명서 이미지의 캡션(예: [기타 1])은 화면에 노출하지 않음 */}
-            {!isOtherImage && altText && (
+            {/* 기타 이미지 및 연속 표 이미지의 캡션은 화면에 노출하지 않음 */}
+            {!isOtherImage && !isTableContinuation && altText && (
               <figcaption style={{ marginTop: '10px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                 {altText}
               </figcaption>

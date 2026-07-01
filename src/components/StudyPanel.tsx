@@ -333,7 +333,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       );
     }
 
-    // 0. Standalone bold line: **제목** (전체 줄이 **...**인 경우 → 섹션 소제목)
+     // 0. Standalone bold line: **제목** (전체 줄이 **...**인 경우 → 섹션 소제목)
     const standaloneBold = text.match(/^\*\*([^*]+)\*\*$/);
     if (standaloneBold) {
       return (
@@ -354,9 +354,13 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       );
     }
 
-    // 1. Markdown image: ![alt text](/images/...)
-    // 정규식 오류 방지를 위해 시작과 끝 및 괄호 분리 연산 사용
+    // 0000. '기타' 임시 캡션 텍스트는 화면 노출을 생략함
     const cleanText = text.trim();
+    if (/^[>#\s]*\[기타\s*\d+\]/i.test(cleanText)) {
+      return null;
+    }
+
+    // 1. Markdown image: ![alt text](/images/...)
     if (cleanText.startsWith('![') && cleanText.endsWith(')')) {
       const lastOpenParen = cleanText.lastIndexOf('(');
       if (lastOpenParen !== -1) {
@@ -366,28 +370,35 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
         let altText = altPart;
         if (altPart.startsWith('![') && altPart.endsWith(']')) {
           altText = altPart.slice(2, altPart.length - 1).trim();
-          // [그림 8] 과 같이 대괄호가 중복된 경우 내부 대괄호만 추출
           if (altText.startsWith('[') && altText.endsWith(']')) {
             altText = altText.slice(1, altText.length - 1).trim();
           }
         }
+
+        // 기타(_other) 설명서 이미지 여부 감지
+        const isOtherImage = srcPart.includes('_other') || altText.startsWith('기타') || altText.startsWith('[기타');
+
         return (
-          <figure key={idx} style={{ margin: '24px auto', textAlign: 'center', maxWidth: '75%' }}>
+          <figure key={idx} style={{ 
+            margin: isOtherImage ? '18px 0' : '24px auto', 
+            textAlign: 'center', 
+            maxWidth: isOtherImage ? '100%' : '75%' 
+          }}>
             <img
               src={srcPart}
               alt={altText}
               style={{
                 maxWidth: '100%',
-                maxHeight: '360px',
+                width: isOtherImage ? '100%' : 'auto',
+                maxHeight: isOtherImage ? 'none' : '360px',
                 objectFit: 'contain',
-                borderRadius: '12px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                borderRadius: isOtherImage ? '8px' : '12px',
+                boxShadow: isOtherImage ? '0 2px 12px rgba(0,0,0,0.06)' : '0 4px 20px rgba(0,0,0,0.12)',
                 border: '1px solid var(--border-color)',
                 display: 'block',
                 margin: '0 auto'
               }}
               onError={(e) => {
-                // 이미지가 없을 때 에러 패널 노출
                 e.currentTarget.style.display = 'none';
                 const sibling = e.currentTarget.nextElementSibling as HTMLElement;
                 if (sibling) sibling.style.display = 'flex';
@@ -414,7 +425,8 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                 설정 경로: {srcPart}
               </span>
             </div>
-            {altText && (
+            {/* 기타 설명서 이미지의 캡션(예: [기타 1])은 화면에 노출하지 않음 */}
+            {!isOtherImage && altText && (
               <figcaption style={{ marginTop: '10px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                 {altText}
               </figcaption>

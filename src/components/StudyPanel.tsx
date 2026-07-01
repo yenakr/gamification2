@@ -290,7 +290,11 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
       
       if (prevParagraph) {
         const prevTrimmed = prevParagraph.trim();
-        if (
+        if (prevTrimmed.startsWith('__SOURCE_BLOCK__')) {
+          // 이전 라인도 출처인 경우, 겹침을 방지하고 연속된 행으로 연출되도록 여백 축소
+          marginTopVal = '2px';
+          marginBottomVal = '4px';
+        } else if (
           (prevTrimmed.startsWith('**') && prevTrimmed.endsWith('**')) ||
           prevTrimmed.startsWith('-') ||
           prevTrimmed.startsWith('*') ||

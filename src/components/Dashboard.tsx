@@ -46,8 +46,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   isGuest = false
 }) => {
   const [showXpModal, setShowXpModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'map' | 'report'>('map');
+  const [activeTab, setActiveTab] = useState<'map' | 'report' | 'achievements'>('map');
   const [certSearchQuery, setCertSearchQuery] = useState('');
+  const [selectedCertCategory, setSelectedCertCategory] = useState<string>('all');
 
   const getCategoryCompletionPercent = (catId: string) => {
     const cat = quizData.find(c => c.id === catId);
@@ -167,10 +168,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Tab Nav Bar */}
       <div className="admin-nav-bar" style={{ padding: '6px', margin: '20px 0', background: 'rgba(0,0,0,0.02)' }}>
-        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+        <div style={{ display: 'flex', gap: '8px', width: '100%', flexWrap: 'wrap' }}>
           <button
             className={activeTab === 'map' ? 'primary-btn' : 'secondary-btn'}
-            style={{ flex: 1, padding: '10px', borderRadius: '12px', fontSize: '0.95rem' }}
+            style={{ flex: 1, minWidth: '120px', padding: '10px', borderRadius: '12px', fontSize: '0.95rem' }}
             onClick={() => {
               sfx.playClick();
               setActiveTab('map');
@@ -180,13 +181,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
           <button
             className={activeTab === 'report' ? 'primary-btn' : 'secondary-btn'}
-            style={{ flex: 1, padding: '10px', borderRadius: '12px', fontSize: '0.95rem' }}
+            style={{ flex: 1, minWidth: '120px', padding: '10px', borderRadius: '12px', fontSize: '0.95rem' }}
             onClick={() => {
               sfx.playClick();
               setActiveTab('report');
             }}
           >
             📈 나의 학습기록
+          </button>
+          <button
+            className={activeTab === 'achievements' ? 'primary-btn' : 'secondary-btn'}
+            style={{ flex: 1, minWidth: '120px', padding: '10px', borderRadius: '12px', fontSize: '0.95rem' }}
+            onClick={() => {
+              sfx.playClick();
+              setActiveTab('achievements');
+            }}
+          >
+            🏆 마스터 업적
           </button>
         </div>
       </div>
@@ -408,6 +419,45 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <h3 style={{ fontWeight: 800, fontSize: '1.15rem', margin: 0 }}>📜 이수증 재발급</h3>
               </div>
 
+              {/* Category Filter Tabs */}
+              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', marginBottom: '16px', paddingBottom: '6px', borderBottom: '1px solid var(--border-color)' }}>
+                <button
+                  onClick={() => { sfx.playClick(); setSelectedCertCategory('all'); }}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    background: selectedCertCategory === 'all' ? 'var(--color-primary)' : 'rgba(0,0,0,0.03)',
+                    color: selectedCertCategory === 'all' ? '#fff' : 'var(--text-main)',
+                    border: '1px solid var(--border-color)',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  전체
+                </button>
+                {quizData.map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => { sfx.playClick(); setSelectedCertCategory(cat.id); }}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      background: selectedCertCategory === cat.id ? 'var(--color-primary)' : 'rgba(0,0,0,0.03)',
+                      color: selectedCertCategory === cat.id ? '#fff' : 'var(--text-main)',
+                      border: '1px solid var(--border-color)',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {cat.icon} {cat.name.replace('돌봄로봇', '').trim()}
+                  </button>
+                ))}
+              </div>
+
               {/* Certificate Search Bar */}
               <div style={{ padding: '10px 14px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-primary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                 <span style={{ fontSize: '1rem' }}>🔍</span>
@@ -462,14 +512,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   }
 
                   const filteredParts = completedParts.filter(({ category, part }) => {
+                    const matchesCategory = selectedCertCategory === 'all' || category.id === selectedCertCategory;
                     const query = certSearchQuery.toLowerCase().trim();
-                    return category.name.toLowerCase().includes(query) || part.title.toLowerCase().includes(query);
+                    const matchesSearch = category.name.toLowerCase().includes(query) || part.title.toLowerCase().includes(query);
+                    return matchesCategory && matchesSearch;
                   });
 
                   if (filteredParts.length === 0) {
                     return (
                       <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)', fontSize: '0.9rem', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        검색 조건에 맞는 이수증이 없습니다.
+                        해당 분류나 검색 조건에 맞는 이수증이 없습니다.
                       </div>
                     );
                   }
@@ -516,6 +568,139 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
 
+          </div>
+        </main>
+      )}
+
+      {/* Tab: Achievements (Master certificates for completing 100% of a care robot category) */}
+      {activeTab === 'achievements' && (
+        <main className="quest-map-area slide-up-anim">
+          <div style={{ textAlign: 'left', marginBottom: '24px' }}>
+            <h2 className="section-title" style={{ margin: 0 }}>🏆 마스터 업적 및 특별 이수증</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '6px' }}>
+              각 돌봄로봇 분야의 모든 평가 과정을 100% 완료하면 해당 로봇 분야의 <strong>골드 마스터 이수증</strong>을 획득할 수 있습니다.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+            {quizData.map(category => {
+              const completedCount = getCategoryCompletionCount(category.id);
+              const totalCount = category.parts.length;
+              const isCompleted = completedCount === totalCount;
+              const percent = getCategoryCompletionPercent(category.id);
+
+              return (
+                <div 
+                  key={category.id} 
+                  className="card-glow" 
+                  style={{ 
+                    padding: '24px', 
+                    textAlign: 'left', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '16px',
+                    border: isCompleted ? '2.5px solid #f59e0b' : '1px solid var(--border-color)',
+                    background: isCompleted ? 'rgba(245, 158, 11, 0.02)' : 'var(--bg-secondary)',
+                    boxShadow: isCompleted ? '0 10px 25px rgba(245, 158, 11, 0.12)' : 'var(--shadow-normal)',
+                    transition: 'all 0.3s'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '2rem' }}>{isCompleted ? '👑' : '🔒'}</span>
+                      <div>
+                        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+                          {category.name} 마스터
+                        </h3>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                          달성 현황: {completedCount} / {totalCount} 파트 완료
+                        </span>
+                      </div>
+                    </div>
+                    {isCompleted && (
+                      <span className="badge-pill" style={{ background: '#f59e0b', color: '#fff', fontWeight: 800, fontSize: '0.75rem', padding: '4px 10px' }}>
+                        ★ MASTER
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Progress gauge */}
+                  <div>
+                    <div className="progress-bar-container" style={{ height: '10px', background: 'rgba(0,0,0,0.05)' }}>
+                      <div 
+                        className="progress-bar-fill" 
+                        style={{ 
+                          width: `${percent}%`, 
+                          background: isCompleted 
+                            ? 'linear-gradient(to right, #f59e0b, #eab308)' 
+                            : 'var(--color-primary)'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Issuer controls */}
+                  <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', gap: '8px' }}>
+                    {isCompleted ? (
+                      <>
+                        <button
+                          className="primary-btn"
+                          style={{ 
+                            flex: 1, 
+                            padding: '10px 16px', 
+                            fontSize: '0.85rem', 
+                            borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #f59e0b, #eab308)',
+                            boxShadow: '0 4px 12px rgba(245, 158, 11, 0.25)'
+                          }}
+                          onClick={() => {
+                            CertificateGenerator.downloadImage(
+                              profile?.name || '학습자',
+                              `${category.name} 종합 마스터 과정`,
+                              100,
+                              0,
+                              true // isMaster
+                            );
+                          }}
+                        >
+                          🏆 이미지 저장
+                        </button>
+                        <button
+                          className="secondary-btn"
+                          style={{ 
+                            flex: 1, 
+                            padding: '10px 16px', 
+                            fontSize: '0.85rem', 
+                            borderRadius: '12px',
+                            border: '1.5px solid #f59e0b',
+                            color: '#d97706'
+                          }}
+                          onClick={() => {
+                            CertificateGenerator.printPdf(
+                              profile?.name || '학습자',
+                              `${category.name} 종합 마스터 과정`,
+                              100,
+                              0,
+                              true // isMaster
+                            );
+                          }}
+                        >
+                          🖨️ PDF 인쇄
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        className="secondary-btn"
+                        style={{ flex: 1, padding: '10px 16px', fontSize: '0.85rem', borderRadius: '12px', opacity: 0.6, cursor: 'not-allowed' }}
+                        disabled
+                      >
+                        🔒 전체 파트 수료 시 해금
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </main>
       )}

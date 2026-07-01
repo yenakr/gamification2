@@ -408,6 +408,8 @@
 
 ###### 2.4 사회적 상호작용 촉진
 
+[출처] Nijs, K., de Graaf, C., van Staveren, W. A., & de Groot, L. C. (2009). Malnutrition and Mealtime Ambiance in Nursing Homes. Journal of the American Medical Directors Association. 10 (4), 226-229.
+
 사람들이 다른 사람들과 함께 식사할 때, 혼자 있을 때보다 더 많이 먹는 경향이 있다는 연구 결과가 있습니다. 이는 다른 사람의 존재가 행동에 긍정적인 영향을 미치기 때문입니다. 사회적 상호작용을 촉진하는 방법은 다음과 같습니다.
 
 - **정기적인 모임 활동**: 정해진 시간에 모임 활동을 하면 다양한 음식을 제공할 수 있고, 돌봄받는자들 간의 상호작용도 촉진할 수 있습니다. 돌봄주는자는 이를 지원하고, 돌봄받는자가 서로 대화하고 어울릴 수 있도록 도와야 합니다.
@@ -577,6 +579,8 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 - 미끄럼 방지 매트
 
 ###### 2.7 구강위생
+
+[출처] Pearson, A., & Chalmers, J. (2004). Oral hygiene care for adults with dementia in residential aged care facilities. JBI Evidence Synthesis, 2(3), 1-89. http://ovidsp.ovid.com/ovidweb.cgi?T=JS&PAGE=reference&D=ovftg&NEWS=N&AN=01238579-200404000-00001
 
 노인의 구강 건강은 전반적인 건강과 삶의 질에 매우 중요한 요소입니다. 구강위생 상태가 좋지 않거나 치통이 있을 경우, 식사 능력, 체중 유지, 의사소통, 수분섭취, 외모, 사회적 상호작용 등 다양한 측면에서 부정적인 영향을 받을 수 있습니다.
 
@@ -862,11 +866,15 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 
 ##### 1. 식사 제공 전 준비
 
+[출처] Anderson L. (2017). Assisting patients with eating and drinking to prevent malnutrition. Nursing Times, 113 (11), 23-25.
+
 ###### 1.1 식사시간 보장
 
 식사 시간에는 시급하지 않은 모든 일을 중단하고, 돌봄받는자가 편안하게 식사할 수 있도록 도와야 합니다. 현실적으로 어려울 수 있지만, 돌봄주는자는 식사하는 동안 방해받지 않도록 최선을 다해야 합니다.
 
 가족이나 돌봄주는자가 함께 와서 식사와 음료를 도와주는 것이 좋습니다. 특히 치매나 학습장애가 있는 돌봄받는자는 아는 사람의 도움을 더 잘 받아들이기 때문에 가족과 함께 도와주는 것이 좋은 방법입니다.
+
+[출처] National Patient Safery Agency. (2003). Ten Key Characteristics of Good Nutritional Care in Hospitals. National Patient Safety Agency. https://www.bapen.org.uk/pdfs/coe_leaflet.pdf
 
 ###### 1.2 장비 및 기기의 필요성 평가
 
@@ -877,6 +885,8 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 돌봄시설에 있는 돌봄받는자들은 각자의 건강 상태와 기능 수준에 따라 음식을 씹고 삼키는 능력이 다릅니다. 돌봄받는자의 씹기와 삼키기 능력에 맞게 음식의 질감을 조절하거나, 액상 음식에 점도증진제를 넣어 농도를 조절할 수 있습니다.
 
 국제 연하곤란식 표준화체계를 기반으로 돌봄받는자에게 제공하는 음식의 질감을 정해주는 것이 좋습니다. 2019년에 식품의약품안전처에서 발행한 조리법 책자에 따르면 이를 한국 음식에 맞게 분류한 방법이 제공되어 있습니다. 음식의 질감과 점도는 0부터 7까지 체계적으로 구분할 수 있어 돌봄받는자의 상태에 맞는 음식을 제공할 수 있습니다.
+
+[출처] 식품의약품안전처. (2019). 저작 및 연하곤란자를 위한 조리법 안내 [Internet]. 식품의약품안전처 식품소비안전국 식생활영양안전정책과. Retrieved October 25, 2024, from https://www.mfds.go.kr/brd/m_218/view.do?seq=33281&srchFr=&srchTo=&srchWord=&srchTp=&itm_seq_1=0&itm_seq_2=0&multi_itm_seq=0&company_cd=&company_nm=&page=4.
 
 > [그림 5] 저작 및 연하곤란 식사 기준 체계
 
@@ -892,7 +902,7 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 
 점도증진제는 음식을 쉽게 삼킬 수 있도록 도와주고, 음식이 기도에 들어가는 위험을 줄여줍니다. 갈아서 만든 음식이나 음료에 점도를 더해주어, 음식을 삼키기어려운 돌봄받는자들이 탈수를 방지하고 영양을 더 잘 섭취할 수 있도록 도와줍니다.
 
-- **사용 방법**
+**사용 방법**:
 
 - 먹을 음식을 준비합니다.
 
@@ -902,7 +912,7 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 
 - 우유나 두유처럼 단백질이 많은 액체는 점도가 덜 생길 수 있으니, 10분 정도 기다리고 다시 충분히 저어 점도를 확인합니다.
 
-- **사용 시 주의사항**
+**사용 시 주의사항**:
 
 - 점도증진제의 양은 돌봄받는자의 삼킴 능력에 맞춰 조절합니다.
 
@@ -912,7 +922,12 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 
 - 개봉 후에는 점도증진제를 빨리 사용하는 것이 좋습니다.
 
+[출처] 한국메디칼푸드. (2019). 점도증진제 [Internet]. 한국메디칼푸드. Retrieved October 25, 2024, from https://medifoods.co.kr/html/medifood02.html
+
 ##### 2. 식사돌봄 절차
+
+[출처] Anderson, L. (2017). Assisting patients with eating and drinking to prevent malnutrition. Nursing Times, 113 (11), 23-25.
+[출처] Indiana Department of Health. Dining assistant training manual; Curriculum [Internet]. Indiana Department of Health. Retrieved October 25, 2024, from https://www.in.gov/health/ltc/aide-training-and-certification/dining/
 
 ###### 2.1 일반상황
 
@@ -933,6 +948,8 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 - 식사 전에 손과 얼굴을 씻도록 돕습니다.
 
 - 침대 옆 의자나 식탁에 앉히며, 일어날 수 없는 경우에는 침대에서 똑바로 앉을 수 있도록 도와줍니다. 이렇게 하면 삼키기 쉬워지고 음식물이 기도로 넘어가는 것을 막을 수 있습니다.
+
+[출처] Dougherty, L., & Lister, S. (2015). The Royal Marsden Hospital manual of clinical nursing procedures. Wiley-Blackwell.
 
 - 돌봄받는자가 의치를 사용할 경우 의치가 깨끗한지 확인하고, 필요하면 의치를 넣도록 도와줍니다.
 
@@ -1052,11 +1069,17 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 
 > ![[표 2] 섭취량 평가 도구](/images/feeding/feeding_table2.png)
 
+[출처] Anderson, L (2017) How to complete a food/fluid chart accurately. Assisting patients with eating and drinking to prevent malnutrition. Nursing Times [online]; 113, 11, 23-25.을 바탕으로 재구성
+
 ##### 4. 돌봄받는자의 식사와 관련된 문제
 
 돌봄받는자의 식사를 어렵게 하거나 식사 과정에서 발생할 수 있는 문제들은 다음과 같습니다.
 
+[출처] Mealtime assistance program handbook. (2014). Bridgepoint Active Healthcare. https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
+
 ###### 4.1 연하곤란
+
+[출처] 식품의약품안전처. (2019). 저작 및 연하곤란자를 위한 조리법 안내 [Internet]. 식품의약품안전처 식품소비안전국 식생활영양안전정책과. Retrieved October 25, 2024, from https://www.mfds.go.kr/brd/m_218/view.do?seq=33281&srchFr=&srchTo=&srchWord=&srchTp=&itm_seq_1=0&itm_seq_2=0&multi_itm_seq=0&company_cd=&company_nm=&page=4.
 
 연하곤란은 음식물이 입에서 식도를 지나 위로 제대로 내려가지 않는 상태입니다. 쉽게 말해, 음식을 삼킬 때 어려움을 겪는 것입니다. 이 문제는 여러 가지 원인으로 생길 수 있습니다.
 
@@ -1069,7 +1092,6 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 - 그리고 특정 약물도 삼키는 과정을 방해할 수 있습니다.
 
 **연하곤란 기능척도**
-
 
 > [표 3] 연하곤란 기능척도
 
@@ -1086,6 +1108,9 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 - **혈전, 욕창 및 낙상 위험 증가**: 요즘 요양시설에 들어오는 돌봄받는자들은 예전보다 더 고령이고 건강이 약해진 상태인 경우가 많아요. 이런 돌봄받는자들은 급성이나 만성 질병도 있고, 근육이 많이 줄어들기 때문에 기침을 하거나 똑바로 앉는 것 같은 기본적인 활동을 하기 어려워집니다. 이렇게 되면 움직임이 줄어들고, 돌봄받는자가 돌봄주는자에게 의존하게 되죠. 그로 인해 폐렴 같은 다른 건강 문제에 걸릴 위험도 커집니다. 그리고 근육이 줄어들어 잘 움직이지 않으면 혈전(피가 굳어지는 것), 욕창(계속된 압력이나마찰로 피부가 손상되는 것), 낙상(넘어지는 것)의 위험도 커지게 됩니다.
 
 - **합병증 발생 위험 증가**: 영양이 부족한 돌봄받는자는 같은 질병을 앓고 있어도 영양 상태가 좋은 사람보다 합병증이 생길 위험이 최대 20배 더 커질 수 있습니다. 결국 영양실조는 돌봄받는자의 질병이 더 심해지거나, 심지어 사망으로 이어질 수 있습니다.
+
+[출처] Committee of Experts on Nutrition Food and Consumer Health, Council of Europe. (2009). Nutrition in care homes and home care: Report and recommendations: From recommendations to action. Council of Europe.
+[출처] 오승종. (2021). Perioperative nutritional support. Journal of Clinical Nutrition, 13 (1), 7. https://jcn.nutrition.or.kr/journal/view.html?doi=10.15747/jcn.2021.13.1.7
 
 **영양실조의 원인**
 
@@ -1143,6 +1168,8 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 
 > ![[그림 6] 하루 평균 영양 섭취 칼로리](/images/feeding/feeding_fig6.png)
 
+[출처] 보건복지부. (2020). 한국인 영양소 섭취기준 [Internet]. 한국영양학회. Retrieved October 25, 2024, from https://www.kns.or.kr/fileroom/FileRoom_view.asp?mode=mod&restring=%252FFileRoom%252FFileRoom%252Easp%253Fxsearch%253D1%253D%253Dcn%255Fsearch%253D%25BF%25B5%25BE%25E7%25BC%25D2%253D%253Dxrow%253D10%253D%253DBoardID%253DKdr%253D%253Dpage%253D1&idx=125&page=1&BoardID=Kdr&xsearch=1&cn_search=%BF%B5%BE%E7%BC%D2.
+
 **영양실조 위험 선별/평가**
 
 영양실조 위험을 선별하는 과정은 매우 중요합니다. 이 절차를 통해 영양실조에 걸릴 위험이 있는 돌봄받는자의 수를 더 잘 파악할 수 있습니다. 만약 영양 상태를 제대로 평가하지 않으면 영양실조를 알아채지 못하고 치료를 하지 않아 상태가 더 나빠질 수 있습니다. 노인 돌봄시설에서는 다양한 유효하고 신뢰할 수 있는 영양실조 선별 도구를 사용할 수 있습니다.
@@ -1162,6 +1189,9 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 - 정해진 식사 시간과 좋은 식사 분위기를 제공하는 것도 음식 섭취를 개선하는 데 도움이 됩니다.
 
 - 영양 관리 계획은 돌봄받는자의 병력과 상태를 고려하여, 각자의 건강 상태에 맞춰 세심하게 조정되어야 합니다.
+
+[출처] Cheryl, W., et al. (2009). Evidence-based practice guidelines for the nutritional management of malnutrition in adult patients across the continuum of care. Nutrition & Dietetics , 66(3), S1:34.
+[출처] Milne, A. C., Potter, J., Vivanti, A., & Avenell, A. (2009). Protein and energy supplementation in elderly people at risk from malnutrition [Review]. Cochrane Database of Systematic Reviews. The Cochrane Collaboration: John Wiley.
 
 **모니터링/추적**
 
@@ -1215,9 +1245,9 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 
 - 질병이나 전신 쇠약 등으로 인해 삼키는 기능이 저하된 경우
 
-**하임리히법**
+[출처] Indiana Department of Health. Dining assistant training manual; Curriculum [Internet]. Indiana Department of Health. Retrieved October 25, 2024, from https://www.in.gov/health/ltc/aide-training-and-certification/dining/
 
-**단계**
+**하임리히법 단계**
 
 1. 먼저, 의료진에게 도움을 요청하고, 돌봄받는자와 계속 함께 있습니다. 돌봄받는자의 상태를 안전하게 유지하면서도 편안함을 주는 것이 중요합니다.
 
@@ -1539,39 +1569,37 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 
 - 다음은 식사돌봄로봇 및 기기의 다양한 유형과 각각의 설명입니다.
 
-- 케어밀 (엔티로봇, 대한민국): 밥, 국, 김치 등다양한 반찬을 다룰 수 있는 로봇. 두 개의 로봇 팔로 밥과 반찬을 옮길 수 있으며, 돌봄받는자가 조작할 수 있는 조이스틱과 안드로이드 앱을 통해 개인 설정을 할 수 있음
+- **케어밀 (엔티로봇, 대한민국)**: 밥, 국, 김치 등다양한 반찬을 다룰 수 있는 로봇. 두 개의 로봇 팔로 밥과 반찬을 옮길 수 있으며, 돌봄받는자가 조작할 수 있는 조이스틱과 안드로이드 앱을 통해 개인 설정을 할 수 있음
 
-- 밀버디 (퍼포먼스 헬스, 미국): 버튼을 눌러 식사속도와 그릇을 자동으로 조정하는 기기
+- **밀버디 (퍼포먼스 헬스, 미국)**: 버튼을 눌러 식사속도와 그릇을 자동으로 조정하는 기기
 
-- 밀타임 파트너 (밀타임 파트너스 LLC, 미국): 세개의 분리된 그릇과 회전 기능을 통해 돌봄받는자가 손을 사용하지 않고 음식을 먹을 수 있도록 도움**
+- **밀타임 파트너 (밀타임 파트너스 LLC, 미국)**: 세개의 분리된 그릇과 회전 기능을 통해 돌봄받는자가 손을 사용하지 않고 음식을 먹을 수 있도록 도움**
 
-- 마이 스푼 (세콤, 일본): 조이스틱으로 포크와 숟가락을 조작해 음식을 집어 올리며, 부드러운음식도 잘 잡을 수 있음
+- **마이 스푼 (세콤, 일본)**: 조이스틱으로 포크와 숟가락을 조작해 음식을 집어 올리며, 부드러운음식도 잘 잡을 수 있음
 
-- 오비 (데신, LLC, 미국): 맞춤형 스위치로 음식을 선택하고 입으로 전달하는 기기
+- **오비 (데신, LLC, 미국)**: 맞춤형 스위치로 음식을 선택하고 입으로 전달하는 기기
 
-- 니터 이터 로보틱스 (니터, 영국): 휴대성이 뛰어나 식사 시간을 유연하게 조정할 수 있으며, 터치스크린과 스위치로 제어할 수 있음
+- **니터 이터 로보틱스 (니터, 영국)**: 휴대성이 뛰어나 식사 시간을 유연하게 조정할 수 있으며, 터치스크린과 스위치로 제어할 수 있음
 
 **반자동 팔 지지대**
 
-- 컨트롤러형 팔 지지대: 전동식 팔 지지대로 돌봄받는자가 컨트롤러나 애플리케이션으로 지지 강도를 조정할 수 있음
+- **컨트롤러형 팔 지지대**: 전동식 팔 지지대로 돌봄받는자가 컨트롤러나 애플리케이션으로 지지 강도를 조정할 수 있음
 
-- 전동휠체어 부착형 팔 지지대: 근육 약화로 음식을 먹기 어려운 사람들에게 상지 움직임을 지원하며, 휠체어와 연결하여 사용함
-
-**수동 식사돌봄로봇 및 기기**
+- **전동휠체어 부착형 팔 지지대**: 근육 약화로 음식을 먹기 어려운 사람들에게 상지 움직임을 지원하며, 휠체어와 연결하여 사용함
 
 **수동형 식사돌봄 로봇**
 
-- 니터 이터 (니터, 영국): 수동형 팔 로봇으로, 음식을 숟가락에 담고 자동으로 수평을 유지하여 음식이 쏟아지지 않게 도움
+- **니터 이터 (니터, 영국)**: 수동형 팔 로봇으로, 음식을 숟가락에 담고 자동으로 수평을 유지하여 음식이 쏟아지지 않게 도움
 
 **수동형 팔 지지대**
 
-- 슬라이드형 팔 지지대: 팔꿈치와 팔을 지지하며 손목을 기기 상단으로 이동시켜 음식을 입에 가져다 대도록 도움
+- **슬라이드형 팔 지지대**: 팔꿈치와 팔을 지지하며 손목을 기기 상단으로 이동시켜 음식을 입에 가져다 대도록 도움
 
-- 어깨/팔꿈치 지지대: 경미한 조정 불능 및떨림이 있는 사람을 위한 지원 장치
+- **어깨/팔꿈치 지지대**: 경미한 조정 불능 및떨림이 있는 사람을 위한 지원 장치
 
-- 팔걸이 지지대: 어깨 근육 마비, 경추 손상 등으로 팔을 지지하고 재활을 도움
+- **팔걸이 지지대**: 어깨 근육 마비, 경추 손상 등으로 팔을 지지하고 재활을 도움
 
-- 스프링 팔 지지대: 팔의 힘이 약한 사람을 위한 팔 지지 장치로, 최소한의 힘만으로 팔을 움직일 수 있도록 도움
+- **스프링 팔 지지대**: 팔의 힘이 약한 사람을 위한 팔 지지 장치로, 최소한의 힘만으로 팔을 움직일 수 있도록 도움
 
 ### Part Ⅴ. 식사돌봄로봇 및 기기 사용의 실제
 
@@ -1820,6 +1848,8 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 
 ###### 1.1 적응과 금기
 
+[출처] Obi. (2018). Obi user manual. DESiN LLC
+
 **식사돌봄로봇 및 기기 사용의 적응증**
 
 돌봄받는자와 돌봄주는자는 식사돌봄로봇과 기기 사용에 대해 잘 알고 있는 전 문가의 평가를 받아야 합니다. 이를 통해 이 기기를 안전하게 사용할 수 있을지, 사용 중에 누가 감독이 필요한지, 도움 없이 음식을 씹고 삼킬 수 있는지, 질식 위험은 없는지 등을 확인해야 합니다.
@@ -1847,6 +1877,10 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 - 뇌성마비 환자처럼 지지를 해줘도 똑바른 자세를 유지할 수 없는 경우
 
 ###### 1.2 안전한 사용을 위한 주의사항
+
+[출처] Obi. (2018). Obi user manual. DESiN LLC
+[출처] Neater. (2024). Neater Eater Robotic help and instructions. Neater. Retrieved October 25, 2024, from https://www.neater.co.uk/ner-help
+[출처] Bestic AB. (2015). Manual for Bestic: Eating Assistive Device Bestic software version 2.4. Bestic AB. Retrieved October 25, 2024, from https://portale.siva.it/files/doc/product/pd2023_manual-for-bestic-2.4_en_ver3.pdf
 
 - 사용하기 전에, 특히 기기를 조정하기 전에 설명서를 꼭 읽어봅니다. 잘못 사용하면 기기가 고장 나거나 돌봄받는자가 위험해질 수 있습니다.
 
@@ -1876,6 +1910,9 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 
 ##### 2. 식사돌봄로봇 및 기기 관리
 
+[출처] Obi. (2018). Obi user manual. DESiN LLC
+[출처] Bestic AB. (2015). Manual for Bestic: Eating Assistive Device Bestic software version 2.4. Bestic AB. Retrieved October 25, 2024, from https://portale.siva.it/files/doc/product/pd2023_manual-for-bestic-2.4_en_ver3.pdf
+
 ###### 2.1 세척 및 소독
 
 - 접시, 식판, 숟가락을 세척하기 전후에는 비누와 물로 손을 깨끗이 씻습니다. 위생이 중요합니다.
@@ -1890,15 +1927,15 @@ https://pdf4pro.com/view/mealtime-assistance-program-handbook-5ba2d4.html
 
 ###### 2.2 보관 및 폐기
 
-- 보관 방법: 식사돌봄로봇과 기기는 평평한 곳에 세워 놓고 보관합니다. 기기와 전원 장치는 제공된 것만 사용해야 합니다.
+- **보관 방법**: 식사돌봄로봇과 기기는 평평한 곳에 세워 놓고 보관합니다. 기기와 전원 장치는 제공된 것만 사용해야 합니다.
 
-- 충전: 기기를 처음 사용할 때는 약 30분 정도 충전합니다.
+- **충전**: 기기를 처음 사용할 때는 약 30분 정도 충전합니다.
 
-- 기기 폐기 방법: 사용한 전기와 전자 제품은 일반 쓰레기와 함께 버리지 말고, 지정된 수거 장소에 가져가야 합니다. 이렇게 하면 자원을 아끼고, 환경이나 건강에 미치는 영향을 줄일 수 있습니다.
+- **기기 폐기 방법**: 사용한 전기와 전자 제품은 일반 쓰레기와 함께 버리지 말고, 지정된 수거 장소에 가져가야 합니다. 이렇게 하면 자원을 아끼고, 환경이나 건강에 미치는 영향을 줄일 수 있습니다.
 
-- 배터리 폐기: 리튬 이온 배터리는 반드시 올바르게 폐기해야 합니다. 배터리를 분리하거나 기기를 임의로 분해하지 않도록 합니다.
+- **배터리 폐기**: 리튬 이온 배터리는 반드시 올바르게 폐기해야 합니다. 배터리를 분리하거나 기기를 임의로 분해하지 않도록 합니다.
 
-- 폐기 방법 안내: 배터리와 기기의 폐기 방법에 대해서는 가까운 재활용 업체나폐기물 처리 시설에 문의하여 정확한 방법을 확인합니다.
+- **폐기 방법 안내**: 배터리와 기기의 폐기 방법에 대해서는 가까운 재활용 업체나 폐기물 처리 시설에 문의하여 정확한 방법을 확인합니다.
 
 #### 정리하기
 

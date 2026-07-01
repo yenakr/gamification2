@@ -25,6 +25,14 @@ const categoryFileMapping: Record<string, string> = {
   communication: '05_communication.md'
 };
 
+const categoryWordMapping: Record<string, string> = {
+  transfer: '이승',
+  excretion: '배설',
+  meal: '식사',
+  posture: '자세',
+  communication: '소통'
+};
+
 export const StudyPanel: React.FC<StudyPanelProps> = ({
   part,
   categoryId,
@@ -34,6 +42,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
 }) => {
   const [currentCategoryId, setCurrentCategoryId] = useState(categoryId);
   const [currentPart, setCurrentPart] = useState<PartData>(part);
+  const [tempCategoryId, setTempCategoryId] = useState(categoryId);
   const [pages, setPages] = useState<PageData[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -440,6 +449,9 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
           className="study-badge card-glow"
           onClick={() => {
             sfx.playClick();
+            if (!showNavPopover) {
+              setTempCategoryId(currentCategoryId); // 열 때 임시 카테고리를 현재 카테고리로 초기화
+            }
             setShowNavPopover(!showNavPopover);
           }}
           style={{
@@ -476,7 +488,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                 position: 'absolute', 
                 top: '48px', 
                 right: '0', 
-                width: '340px', 
+                width: '350px', 
                 zIndex: 100, 
                 padding: '16px',
                 borderRadius: '16px',
@@ -492,49 +504,54 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
                 🧭 교재 빠른 이동
               </div>
 
-              {/* 5대 로봇 카테고리 탭 (이모지 형태의 콤팩트 가로 탭) */}
+              {/* 5대 로봇 카테고리 탭 (단어명이 포함된 가로 탭) */}
               <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {quizData.map((cat) => {
-                  const isActive = cat.id === currentCategoryId;
+                  const isActive = cat.id === tempCategoryId;
                   return (
                     <button
                       key={cat.id}
                       title={cat.name}
                       onClick={() => {
                         sfx.playClick();
-                        setCurrentCategoryId(cat.id);
-                        if (cat.parts && cat.parts.length > 0) {
-                          setCurrentPart(cat.parts[0]);
-                        }
+                        setTempCategoryId(cat.id); // 탭 클릭 시 화면 이동하지 않고 임시 카테고리 상태만 변경
                       }}
                       style={{
                         flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
                         padding: '6px 10px',
                         borderRadius: '10px',
                         border: isActive ? '1.5px solid var(--color-primary)' : '1px solid var(--border-color)',
                         background: isActive ? 'rgba(124, 58, 237, 0.08)' : 'var(--bg-primary)',
-                        fontSize: '1.05rem',
+                        fontSize: '0.85rem',
+                        fontWeight: isActive ? 800 : 600,
+                        color: isActive ? 'var(--color-primary)' : 'var(--text-main)',
                         cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        fontFamily: 'var(--font-game)'
                       }}
                     >
-                      {cat.icon}
+                      <span>{cat.icon}</span>
+                      <span>{categoryWordMapping[cat.id] || cat.name.slice(0, 2)}</span>
                     </button>
                   );
                 })}
               </div>
 
-              {/* 챕터 리스트 (세로 스크롤형 깔끔한 버튼 목록) */}
+              {/* 챕터 리스트 (선택한 임시 카테고리의 챕터들을 보여줌) */}
               <div style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px', paddingRight: '2px' }}>
-                {quizData.find(c => c.id === currentCategoryId)?.parts.map((p) => {
-                  const isPartActive = p.id === currentPart.id;
+                {quizData.find(c => c.id === tempCategoryId)?.parts.map((p) => {
+                  const isPartActive = tempCategoryId === currentCategoryId && p.id === currentPart.id;
                   return (
                     <button
                       key={p.id}
                       onClick={() => {
                         sfx.playClick();
-                        setCurrentPart(p);
-                        setShowNavPopover(false); // 챕터 선택 시 자동 닫힘
+                        setCurrentCategoryId(tempCategoryId); // 최종 챕터 선택 시 실제 활성화 카테고리 반영
+                        setCurrentPart(p); // 최종 챕터 선택 시 학습 파트 변경
+                        setShowNavPopover(false); // 팝오버 닫기
                       }}
                       style={{
                         width: '100%',

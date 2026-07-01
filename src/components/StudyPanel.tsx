@@ -285,8 +285,8 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
         <div key={idx} className="study-source-info" style={{ 
           fontSize: '0.75rem', 
           color: 'var(--text-muted)', 
-          marginTop: '4px', 
-          marginBottom: '4px', 
+          marginTop: '-24px', 
+          marginBottom: '24px', 
           textAlign: 'right',
           wordBreak: 'break-all',
           lineHeight: '1.4'

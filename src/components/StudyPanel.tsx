@@ -239,7 +239,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
           border: '1px solid var(--border-color)', 
           boxShadow: '0 8px 24px rgba(0,0,0,0.04)' 
         }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1.35rem', textAlign: 'left', fontFamily: 'var(--font-game)' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1.2rem', textAlign: 'left', fontFamily: 'var(--font-game)' }}>
             <thead>
               <tr style={{ background: 'linear-gradient(135deg, var(--color-primary), #6366f1)', color: '#ffffff' }}>
                 {headers.map((h, hi) => (
@@ -278,7 +278,7 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
             margin: '28px 0 10px 0',
             paddingLeft: '12px',
             borderLeft: '3px solid var(--color-primary)',
-            fontSize: '1.55rem',
+            fontSize: '1.85rem',
             fontWeight: 800,
             color: 'var(--color-primary)',
             lineHeight: 1.4
@@ -402,14 +402,14 @@ export const StudyPanel: React.FC<StudyPanelProps> = ({
     // 4. List item
     if (text.startsWith('- ') || text.startsWith('* ')) {
       return (
-        <li key={idx} className="study-list-item" style={{ marginLeft: '16px', marginBottom: '16px', lineHeight: '1.7', fontSize: '1.7rem' }}>
+        <li key={idx} className="study-list-item" style={{ marginLeft: '16px', marginBottom: '16px', lineHeight: '1.7', fontSize: '1.3rem' }}>
           {parseBoldText(text.slice(2))}
         </li>
       );
     }
 
     return (
-      <p key={idx} className="study-text-para" style={{ marginBottom: '32px', lineHeight: '1.7', fontSize: '1.785rem', textAlign: 'justify' }}>
+      <p key={idx} className="study-text-para" style={{ marginBottom: '32px', lineHeight: '1.7', fontSize: '1.35rem', textAlign: 'justify' }}>
         {parseBoldText(text)}
       </p>
     );
